@@ -22,7 +22,7 @@
 ```jsonc
 {
   "action": "create",
-  "template": "D:\\Desktop\\真实工程.smc2",        // 模板：决定控制器、POU 集合、任务、IO 配置
+  "template": "D:\\Desktop\\模板.smc2",        // 模板：决定控制器、POU 集合、任务、IO 配置
   "output": "D:\\项目\\输送线.smc2",
   "projectName": "输送线",
   "controller": "NX502-1600 Ver. 1.66",         // 可选，改的就是 manifest 里的 SetUnit 字符串
@@ -37,7 +37,7 @@
 }
 ```
 
-生成后用 `plc_sysmac overview` 复查，或在 Sysmac Studio 里直接打开编译。已实测：改名、换变量表、写 ST 正文、改控制器字符串这四类改动单独和组合都通过；用 11 个 ST POU、25 个变量的中文示例生成的 `.smc2`，在 Sysmac Studio 中打开显示为 `AgentPLC_项目A示例 - new_Controller_0`。
+生成后用 `plc_sysmac overview` 复查，或在 Sysmac Studio 里直接打开编译。已实测：改名、换变量表、写 ST 正文、改控制器字符串这四类改动单独和组合都通过；用 11 个 ST POU、25 个变量的中文示例生成的 `.smc2`，在 Sysmac Studio 中打开显示为 `AgentPLC_示例项目示例 - new_Controller_0`。
 
 生成后默认自动跑一次**静态校验**（`verify: false` 可关闭），结果写在工具返回里；也可以用 `plc_sysmac` 的 `verify` 动作单独复查。校验不是原厂编译器：它抓的是生成最容易犯的错（未声明变量、重复定义、地址冲突、块不配平）。
 
@@ -119,11 +119,7 @@
 
 ## 安装
 
-```powershell
-# 在 DSH 的 Plugins 页面用「添加插件」选择本目录，或用 plugin_manager 安装
-```
-
-本包是本地目录包（`@local/dsh-agentplc`），安装后立即生效，不需要重启。
+详细步骤见文末「部署到你的 DSH agent」。已经装过的话，升级只需覆盖目录后重启 DSH 或在 Plugins 页面重新启用本插件。
 
 ## 配置
 
@@ -155,12 +151,12 @@
 已验证（用本机真实工程）：
 
 - 侧栏入口与主面板都注册成功（`sidebar.panellist` 的 `agentplc` 占位、`main` 的 `agentplc` 键都是 active）。
-- 扫描 `D:\Desktop`、`D:\Documents`、`D:\项目`：79 个条目（62 个 `.smc2`、3 个博途工程、14 个 `.st`）。三个博途工程是 `D:\项目\工程1`（V16）、`D:\项目\现场程序\现场V18工程`（V18）、`D:\项目\项目A\历史程序\项目A_旧`（V16）。
-- 博途工程读取：`现场V18工程` 通过面板路由读到 1 个设备（S7-1200 station_1）和 34 个块，耗时 21 秒；`项目A_旧` 读到 7 个块（`Main, 气缸块, 点位参数, 夹紧气缸, 夹爪气缸, 升降气缸, 定位气缸`）。
+- 扫描 `<桌面>`、`<文档>`、`<工程目录>`：79 个条目（62 个 `.smc2`、3 个博途工程、14 个 `.st`）。三个博途工程是 `<桌面>\项目1`（V16）、`<工程目录>\\示例项目V18`（V18）、`<工程目录>\\历史程序\\示例项目`（V16）。
+- 博途工程读取：`示例项目V18` 通过面板路由读到 1 个设备（S7-1200 station_1）和 34 个块，耗时 21 秒；`示例项目_弃用` 读到 7 个块（`Main, 气缸块, 点位参数, 夹紧气缸, 夹爪气缸, 升降气缸, 定位气缸`）。
 - 解析真实工程：ST 工程 `main_ST` 738 行、`气缸块_ST` 49 行；梯形图工程 `main` 9 段 82 级、`气缸块` 12 级，变量 353 条 / 4 张表。
 - 面板路由：`/state`、`/project`、`/pou`、`/variables.csv`、`/st-source`、`/st-xml` 全部 200，CSV 带 BOM 且中文正常。
 - `plc_st convert` 用 6 个 `.st` 生成 45680 字节 XML（6 个数据类型、5 个功能块、2 个程序），XML 可被标准解析器解析。
-- **`.smc2` 生成链路逐项验证**：以 `D:\Desktop\真实工程.smc2` 为模板，先只重打包（原始内容）→ Sysmac 打开成功；再分别只改名、只换全局变量表、只换 ST 正文、改名+变量+正文组合、改控制器字符串——六个变体全部在 Sysmac Studio 中打开成功。最后用 `plc_sysmac create` 生成 `AgentPLC_输送线示例.smc2`（11 个变量、2 个 POU、中文 ST），Sysmac 窗口标题为 `AgentPLC_输送线示例 - new_Controller_0 - Sysmac Studio (64bit)`。
+- **`.smc2` 生成链路逐项验证**：以 `<模板工程>.smc2` 为模板，先只重打包（原始内容）→ Sysmac 打开成功；再分别只改名、只换全局变量表、只换 ST 正文、改名+变量+正文组合、改控制器字符串——六个变体全部在 Sysmac Studio 中打开成功。最后用 `plc_sysmac create` 生成 `AgentPLC_输送线示例.smc2`（11 个变量、2 个 POU、中文 ST），Sysmac 窗口标题为 `AgentPLC_输送线示例 - new_Controller_0 - Sysmac Studio (64bit)`。
 - **静态校验**：故意写坏的工程报 `2 error(s)`（未声明变量A/B，带行号），正常工程报 `0 error(s)`；`plc_sysmac create` 生成时自动校验，坏样例直接返回 `1 error(s) — 未声明标识符 未声明输出（第 2 行）`；面板路由 `/agentplc/api/sysmac/verify` 返回 200 和问题列表。
 - **原厂编译校验**：`plc_sysmac compile` 在提权副本上执行 F7「检查所有程序」+「重编译控制器」（自动确认「所有程序将重新编译，你要继续吗？」→ 是(Y)），从编译窗口读回 `2 error(s), 0 warning(s)` 和两条带 `PRG_Init line 3/4` 的消息；探针实例跑完自动关闭，原工程未改动。
 - `plc_tia plan`（create/list/importScl 等）能按工程后缀选中 V16 或 V18 API 并生成命令文件。
@@ -177,28 +173,86 @@
 
 ## 来源
 
-- `.smc2` 解析思路与 ST 转换器来自本机工作区 `D:\Documents\deepseek-harness\default-workspace\_脚本\`（`ladder.py`、`st2plcopen.py`、`st2iec61131.py`），转换器已按插件需要包成 `python/convert_st.py`。
+- `.smc2` 解析思路与 ST 转换器来自本机工作区 `<文档>\deepseek-harness\default-workspace\_脚本\`（`ladder.py`、`st2plcopen.py`、`st2iec61131.py`），转换器已按插件需要包成 `python/convert_st.py`。
 - 面板与工具的实现约定见 DSH 插件文档：`sidebar.panellist` 全局面板入口、`main` 面板插槽、Host 侧 `webServer` 只读数据路由。
 
-## 分发给别人用
+## 部署到你的 DSH agent
 
-前提：Windows、DSH 本体；Sysmac/TIA/Python 都是可选的（缺了对应功能报错，面板照常启动）。
+本插件是一个 DSH bundle：装进 DSH 后会在左侧栏出现「PLC 工程台」入口，并注册 4 个工具（`plc_env`、`plc_sysmac`、`plc_st`、`plc_tia`）。
 
-安装方式二选一：
+### 前提
+
+- Windows 10/11；
+- 已安装 DSH（桌面版或 Web 版均可）；
+- 可选工具链（缺了不挡启动，只是对应功能不可用）：
+  - OMRON Sysmac Studio（读/编译 `.smc2`，编译需要管理员权限）；
+  - Siemens TIA Portal V16/V18 + Openness 选项，且当前 Windows 用户属于 `Siemens TIA Openness` 组（加入后需重新登录）；
+  - Python 3（仅 ST → XML 转换用）。
+
+### 方式一：从 GitHub 安装（推荐）
+
+1. 在 GitHub 仓库页点 **Code → Download ZIP**，解压到任意目录，例如 `D:\tools\agentplc-plugin`；
+2. 打开 DSH → **Plugins** 页面 → **添加插件 / install_bundle**，选择解压后的目录（该目录里要有 `package.json` 和 `cordis.patch.yml`）；
+3. 启用插件，刷新页面；
+4. 左侧栏出现「PLC 工程台」即安装成功。
+
+### 方式二：git clone + 本地联动（开发用）
 
 ```powershell
-# 1) 打 tarball 后安装
-npm pack            # 得到 local-dsh-agentplc-0.1.0.tgz
-# 然后在 DSH 里 plugin_manager install_bundle，target 指向该 tgz
+git clone https://github.com/cycle410/PLC-.git D:\tools\agentplc-plugin
 
-# 2) 直接指向目录（开发/内部分发）
-#    plugin_manager install_bundle，target 为解压后的目录
+# 在 DSH profile 的 package.json 里加依赖并重新安装：
+#   "dependencies": { "@local/dsh-agentplc": "link:D:/tools/agentplc-plugin" }
+# 然后在 profile 的 cordis.patch.yml 里加 agentplc 行（见下方配置）。
 ```
 
-配置项（profile 的 cordis.patch.yml 里 agentplc 行）：
+### 方式三：打包成 tarball 分发
 
-- `projectRoots`：扫描目录，空表示用户 Documents/Desktop；
-- `scanDepth` / `scanLimit`：扫描深度与上限；
-- `tiaDefaultVersion`：V16 或 V18，默认 V16。
+```powershell
+cd D:\tools\agentplc-plugin
+npm pack
+# 得到 local-dsh-agentplc-0.1.0.tgz，交给别人
+# 对方在 DSH 里 install_bundle，target 指向这个 tgz
+```
 
-注意：sysmac 原厂编译与 TIA 建工程需要管理员权限（会弹 UAC / Openness 授权）；`Siemens TIA Openness` 组需要把用户加进去并重新登录。
+### 配置
+
+装好后编辑 profile 的 `cordis.patch.yml`，找到 `agentplc` 行：
+
+```yaml
+- id: agentplc
+  name: "@local/dsh-agentplc"
+  config:
+    projectRoots: ["D:/Projects", "D:/Documents"]   # 扫描哪些目录，留空 = 用户 Documents/Desktop
+    scanDepth: 3                                     # 目录深度
+    scanLimit: 200                                   # 最多收录多少项
+    tiaDefaultVersion: V16                           # 博途默认版本 V16/V18
+  disabled: false
+```
+
+改完保存，重启 DSH 或在 Plugins 页面重新启用本插件。
+
+### 验证安装
+
+- 左侧栏有「PLC 工程台」；
+- 打开后状态条显示环境检测结果（TIA 版本、Sysmac、Openness 组）；
+- 左栏能看到你 `projectRoots` 下的 `.smc2` / 博途工程 / `.st`；
+- 点「新建工程」能弹出表单。
+
+### 权限说明
+
+- **Sysmac 原厂编译**（`plc_sysmac compile` 或表单勾选编译）会弹一次 UAC：助手需要管理员权限才能读 Sysmac 的编译窗口；
+- **TIA 建工程/编译**首次可能弹 Openness 访问授权，选「全部确定」；
+- 插件本身不需要常驻管理员权限。
+
+### 更新与卸载
+
+- 更新：用新版本覆盖插件目录，然后在 Plugins 页面重新启用；
+- 卸载：Plugins 页面停用并移除，或从 profile 的 `package.json` / `cordis.patch.yml` 中删掉对应条目。
+
+### 常见问题
+
+- **侧栏没有入口**：确认插件已启用、DSH 已重启；客户端半区需要页面刷新。
+- **列表是 0 个工程**：检查 `projectRoots` 是否指向真实目录，或清空让它扫描默认的 Documents/Desktop。
+- **编译一直等**：UAC 弹窗需要确认；不确认会在 2 分钟后超时。
+- **TIA 报 Openness 安全错误**：把当前用户加入 `Siemens TIA Openness` 组并重新登录。
