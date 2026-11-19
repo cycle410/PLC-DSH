@@ -117,6 +117,45 @@
 
 面板和工具用的是同一套 Host 实现，面板上的按钮只是把这些操作做成了可视化入口。
 
+## 给 Agent / 调用方的规则（生成能编译的程序）
+
+生成 `.smc2` 时按下面的模型写，别把 Sysmac 的规则搞反：
+
+1. **全局变量表只放普通数据类型**（`BOOL` / `INT` / `REAL` / `TIME` / 数组 / 结构体等）。`TON`、`TOF`、`CTU` 这类功能块实例**只能放程序内部变量**（`scope: "VAR"`）。
+2. **程序里用到的每个全局变量，都必须在该程序里再声明一次 `VAR_EXTERNAL`**（同名同类型，`scope: "VAR_EXTERNAL"`）。漏了就会报「未定义的标识符」。
+3. **只支持 ST 语言**；不自动做 IO 分配（`AT %IX/%QX`）和任务设置，这两项需要在 Sysmac 里手动做。
+4. 生成后带 `compile: true` 跑原厂编译，按返回的错误改；警告一般可忽略。
+5. 需要一个真实 `.smc2` 作模板；仓库里的 `examples/AgentPLC_Demo.smc2` 是脱敏最小模板，可直接用来试。
+
+最小调用示例（双线圈气缸）：
+
+```json
+{
+  "action": "create",
+  "template": "D:\\Desktop\\AgentPLC_Demo.smc2",
+  "output": "D:\\Desktop\\Cylinder.smc2",
+  "projectName": "Cylinder",
+  "variablesMode": "merge",
+  "variables": [
+    { "name": "伸出按钮", "dataType": "BOOL" },
+    { "name": "缩回按钮", "dataType": "BOOL" },
+    { "name": "伸出线圈", "dataType": "BOOL" }
+  ],
+  "newPous": [{
+    "name": "PRG_Cylinder",
+    "stText": "伸出线圈 := 伸出按钮 AND NOT 缩回按钮;",
+    "variables": [
+      { "name": "伸出按钮", "dataType": "BOOL", "scope": "VAR_EXTERNAL" },
+      { "name": "缩回按钮", "dataType": "BOOL", "scope": "VAR_EXTERNAL" },
+      { "name": "伸出线圈", "dataType": "BOOL", "scope": "VAR_EXTERNAL" }
+    ]
+  }],
+  "compile": true
+}
+```
+
+带定时器的程序把 `TON` 放到 `newPous[].variables` 的 `scope: "VAR"`，不要放进 `variables`（全局表）。
+
 ## 安装
 
 详细步骤见文末「部署到你的 DSH agent」。已经装过的话，升级只需覆盖目录后重启 DSH 或在 Plugins 页面重新启用本插件。
