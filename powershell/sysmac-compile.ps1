@@ -10,6 +10,7 @@ $ErrorActionPreference = 'Continue'
 Add-Type -AssemblyName UIAutomationClient
 Add-Type -AssemblyName UIAutomationTypes
 Add-Type -AssemblyName System.Drawing
+Add-Type -AssemblyName System.Windows.Forms
 Add-Type @"
 using System;
 using System.Text;
@@ -190,6 +191,32 @@ try {
     if ($messages.Count -gt 0) { break }
     if (((Get-Date) -lt $buildDeadline) -and ((Get-Date) -gt ($buildDeadline.AddSeconds(-40)))) { break }
   }
+  # Final re-read: the pane often shows 0/0 before the rebuild populates it.
+  Start-Sleep -Seconds 6
+  $paneTexts = @()
+  $errorCount = $null
+  $warningCount = $null
+  $messages = @()
+  try {
+    foreach ($element in $root.FindAll([System.Windows.Automation.TreeScope]::Descendants, [System.Windows.Automation.Condition]::TrueCondition)) {
+      try { $name = $element.Current.Name; $type = $element.Current.ControlType } catch { continue }
+      if ($type -eq [System.Windows.Automation.ControlType]::Pane -and $name -eq '编译') { $paneRect = $element.Current.BoundingRectangle; continue }
+      if ($null -ne $paneRect -and $name -and $name.Length -gt 0) { $paneTexts += $name }
+    }
+  } catch { }
+  for ($index = 0; $index -lt $paneTexts.Count; $index++) {
+    $text = $paneTexts[$index]
+    if ($text -eq '错误' -and $index -gt 0 -and $paneTexts[$index - 1] -match '^\d+$') { $errorCount = [int]$paneTexts[$index - 1] }
+    if ($text -eq '警告' -and $index -gt 0 -and $paneTexts[$index - 1] -match '^\d+$') { $warningCount = [int]$paneTexts[$index - 1] }
+    if ($text -match '^line\s+(\d+),\s*column\s+(\d+)$') {
+      $program = if ($index -ge 1) { $paneTexts[$index - 1] } else { '' }
+      $message = if ($index -ge 2) { $paneTexts[$index - 2] } else { '' }
+      $messages += [pscustomobject]@{ text = $message; program = $program; location = $text; line = [int]$matches[1]; column = [int]$matches[2] }
+    }
+  }
+  $result.errorCount = $errorCount
+  $result.warningCount = $warningCount
+  $result.messages = @($messages)
   $result.paneTexts = @($paneTexts | Select-Object -Unique -First 200)
   $result.errorCount = $errorCount
   $result.warningCount = $warningCount

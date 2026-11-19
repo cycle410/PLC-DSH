@@ -140,6 +140,12 @@
 
 ## 前提与已知限制
 
+**当前能力范围（重要）**：
+
+- ✅ 支持：ST（结构化文本）程序的读取与生成、全局变量表、程序内 `VAR_EXTERNAL` 同步声明、新增 POU（Program / FunctionBlock）、静态校验、Sysmac 原厂编译（F7 + 重编译）；
+- ❌ 不支持：**IO 分配**（不会自动写入 `AT %IX/%QX` 地址，需在 Sysmac 里手动分配）、**任务设置**（不能新增/修改任务、周期、优先级）、梯形图/SCL 之外的图形化编辑；
+- ❌ 不支持：删除 POU、修改梯形图程序、HMI/轴/IO 硬件配置生成。
+
 - **`.smc2` 格式是逆向出来的**，不是官方格式。当前实现覆盖：`.oem` 实体树、`.manifest`、ST 主体（`StructuredTextModel`）、SLWD 变量表、梯形图 JSON 梯级。生成用的是「模板 + 替换」而不是从零构造，POU 集合和局部变量表沿用模板。
 - **TIA Openness 已可用**：V16/V18 与 Openness 程序集齐全，用户已加入 `Siemens TIA Openness` 组并重新登录；首次调用 TIA 时若弹出 Openness 访问授权框，选「全部确定」。`.ap16`/`.ap18` 的生成不依赖 TIA 图形界面，但会启动后台 TIA 实例，单次创建约 20–40 秒。
 - **ST 转换需要 Python 3**（本机 `D:\Python\python.exe` 可用）。转换器是 `python/` 下的三个脚本，转换失败会返回完整错误。

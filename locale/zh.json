@@ -1,6 +1,6 @@
 {
   "meta": {
     "title": "PLC 工程台",
-    "description": "左侧栏里的 PLC 工程工作区，思路取自 AgentPLC：把对话、工程工具和项目知识放在同一个工作台。可以离线读取欧姆龙 Sysmac Studio 的 .smc2 工程（控制器型号、任务、POU、ST 源码、变量表），也可以直接生成新的 .smc2：以现有工程为模板，写入你让 Agent 写的 ST 正文、全局变量表和工程名，生成的文件已在 Sysmac Studio 中打开验证；还能把 .st 源文件转换成 Sysmac Studio 可导入的 IEC 61131-10 XML，并通过官方 TIA Openness 接口创建 .ap16/.ap18 工程、导入 SCL、编译、导出块。插件提供 plc_env、plc_sysmac、plc_st、plc_tia 四个 Agent 工具。从会话列表上方的「PLC 工程台」入口打开，或直接在对话里让 Agent 调用。ST 转换需要 Python 3；博途自动化需要当前 Windows 用户加入「Siemens TIA Openness」用户组并在加入后重新登录。读取与生成 .smc2 是本地文件操作，生成前不会改动模板。"
+    "description": "左侧栏里的 PLC 工程工作区，思路取自 AgentPLC：把对话、工程工具和项目知识放在同一个工作台。可以离线读取欧姆龙 Sysmac Studio 的 .smc2 工程（控制器型号、任务、POU、ST 源码、变量表），也可以直接生成新的 .smc2：以现有工程为模板，写入你让 Agent 写的 ST 正文、全局变量表和工程名，生成的文件已在 Sysmac Studio 中打开验证；还能把 .st 源文件转换成 Sysmac Studio 可导入的 IEC 61131-10 XML，并通过官方 TIA Openness 接口创建 .ap16/.ap18 工程、导入 SCL、编译、导出块。插件提供 plc_env、plc_sysmac、plc_st、plc_tia 四个 Agent 工具。从会话列表上方的「PLC 工程台」入口打开，或直接在对话里让 Agent 调用。ST 转换需要 Python 3；博途自动化需要当前 Windows 用户加入「Siemens TIA Openness」用户组并在加入后重新登录。读取与生成 .smc2 是本地文件操作，生成前不会改动模板。当前范围：只支持 ST（结构化文本）程序与变量表的读取/生成，程序内需用 VAR_EXTERNAL 与全局变量同步；暂不支持 IO 分配（AT 地址）和任务设置的自动化，也不支持梯形图编辑。"
   }
 }
