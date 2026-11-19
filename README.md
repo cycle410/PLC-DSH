@@ -268,3 +268,5 @@ node scripts/smoke-test.mjs <模板.smc2>  # 额外跑 create → 静态校验 �
 
 `examples/demo.st` 是冒烟测试用的示例 ST 源文件（TYPE + FUNCTION_BLOCK + PROGRAM）。
 `<模板.smc2>` 必须是真实可读的 Sysmac 工程（冒烟测试不会上传或修改它，只在临时目录生成副本）。
+
+`examples/AgentPLC_Demo.smc2` 是脱敏的最小示例模板（1 个程序、0 变量）；`smoke-test` 不带参数时会自动用它跑完整链路。

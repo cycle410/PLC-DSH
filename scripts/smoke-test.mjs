@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process'
-import { mkdtempSync, readFileSync, rmSync, statSync } from 'node:fs'
+import { existsSync, mkdtempSync, readFileSync, rmSync, statSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -49,7 +49,9 @@ try {
     }
   }
 
-  const template = process.argv[2] && !process.argv[2].startsWith('--') ? process.argv[2] : null
+  const demoProject = join(root, 'examples', 'AgentPLC_Demo.smc2')
+  let template = process.argv[2] && !process.argv[2].startsWith('--') ? process.argv[2] : null
+  if (!template && existsSync(demoProject)) template = demoProject
   if (!template) {
     console.log('SKIP .smc2 pipeline — pass a template path as the first argument to exercise create/verify/add-POU')
   } else {
