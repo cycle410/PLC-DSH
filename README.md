@@ -1,6 +1,6 @@
 # PLC 工程台 · AgentPLC workspace
 
-左侧栏里的 PLC 工程工作区，把对话、工程工具和项目知识放在同一个面板里，思路取自 [AgentPLC](https://agentplc.com/) 的「AI 对话 + PLC 工程工具 + 知识库插件」工作区。当前版本聚焦你实际在用的两条线：**欧姆龙 Sysmac Studio** 和 **西门子 TIA Portal**。
+左侧栏里的 PLC 工程工作区，把对话、工程工具和项目知识放在同一个面板里。当前版本聚焦两条线：**欧姆龙 Sysmac Studio** 和 **西门子 TIA Portal**。
 
 ## 面板能做什么
 
