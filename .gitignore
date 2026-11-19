@@ -1,0 +1,11 @@
+node_modules/
+*.tgz
+*.zip
+*.log
+.agentplc-research/
+out/
+__pycache__/
+python/__pycache__/
+*.pyc
+*.tmp
+*.smc2.tmp*

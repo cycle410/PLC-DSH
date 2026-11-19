@@ -1,0 +1,9 @@
+- insert:
+    - id: agentplc
+      name: '@local/dsh-agentplc'
+      config:
+        # Extra directories scanned for OMRON .smc2 and TIA Portal .ap*/.zap* projects.
+        # Empty means the user's Documents and Desktop folders.
+        projectRoots: []
+        scanDepth: 3
+        scanLimit: 200

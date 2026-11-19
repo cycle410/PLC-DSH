@@ -1,0 +1,1879 @@
+window.__ModuleLoader__.load({
+  id: '@local/dsh-agentplc',
+  factory(require) {
+    const React = require('react')
+    const h = React.createElement
+    const NS = 'agentplc'
+
+    const DICT = {
+      zh: {
+        'nav.label': 'PLC 工程台',
+        title: 'PLC 工程台',
+        subtitle: '欧姆龙 Sysmac Studio · 西门子 TIA Portal',
+        refresh: '刷新',
+        loading: '加载中…',
+        retry: '重试',
+        close: '关闭',
+        'status.ready': '已就绪',
+        'status.loading': '正在读取',
+        'status.checking': '正在检测',
+        'status.error': '读取失败',
+        'card.checking': '正在检测…',
+        'card.sysmac': '欧姆龙 Sysmac Studio',
+        'card.tia': '博途 TIA Openness',
+        'card.st': 'ST → Sysmac XML',
+        'card.installed': '已安装',
+        'card.notInstalled': '未安装',
+        'card.offline': '离线解析 .smc2 可用',
+        'card.opennessReady': 'Openness 就绪',
+        'card.opennessMissing': '未找到 Openness 程序集',
+        'card.userGroup': '用户组：{state}',
+        'card.member': '已在 Openness 组',
+        'card.notMember': '不在 Openness 组',
+        'card.unknown': '未知',
+        'card.converterReady': '转换器就绪（{python}）',
+        'card.converterMissing': '未找到 Python 3',
+        'card.converterHint': '把 .st 转成 Sysmac 可导入的 IEC 61131-10 XML',
+        'list.title': '工程',
+        'list.search': '筛选名称或路径',
+        'list.empty': '未发现工程',
+        'list.emptyFiltered': '没有匹配的工程',
+        'list.generatedAt': '扫描于 {time}',
+        'list.emptyHint': '把 .smc2、TIA 工程目录或 .st 源文件放到扫描目录下，然后刷新。',
+        'list.roots': '扫描 {n} 个目录',
+        'list.truncated': '扫描达到上限，结果可能不完整',
+        'list.counts': '{sysmac} 个 .smc2 · {tia} 个博途 · {st} 个 .st',
+        'detail.emptyTitle': '选择一个工程',
+        'detail.errorTitle': '读取失败',
+        'detail.emptyBody': '左侧选择 .smc2 工程可查看控制器、变量表和 ST 程序；选择 .st 源文件可以直接生成 Sysmac 可导入的 XML。',
+        'detail.emptyHint': '也可以直接在对话里让 Agent 操作：plc_env / plc_sysmac / plc_st / plc_tia',
+        'detail.rootsConfig': '扫描目录由 agentplc.projectRoots 配置决定（profile 的 cordis.patch.yml）。',
+        'tab.overview': '概览',
+        'tab.variables': '变量',
+        'tab.programs': '程序',
+        'meta.controller': '控制器',
+        'meta.compiler': '编译器',
+        'meta.pous': 'POU',
+        'meta.variables': '变量',
+        'meta.tables': '变量表',
+        'meta.tasks': '任务',
+        'meta.size': '大小',
+        'meta.modified': '修改时间',
+        'meta.entries': '归档条目',
+        'meta.guid': '工程 GUID',
+        'meta.language': '语言',
+        'meta.type': '类型',
+        'meta.lines': '正文',
+        'meta.unknown': '未知',
+        'overview.tasks': '任务',
+        'overview.tables': '变量表',
+        'overview.notes': '解析提示',
+        'overview.noNotes': '解析过程中没有发现异常。',
+        'overview.pous': '程序组织单元',
+        'variables.search': '搜索变量名 / 类型 / 地址 / 注释',
+        'variables.count': '共 {total} 条，显示 {shown} 条',
+        'variables.sampleNote': '共 {total} 条；显示样本前 {sample} 条中的 {shown} 条，完整表请下载 CSV',
+        'variables.empty': '没有匹配的变量',
+        'verify.title': '静态校验',
+        'verify.run': '运行校验',
+        'verify.running': '校验中…',
+        'verify.clean': '静态校验通过：未发现未声明变量、重复定义、地址冲突或块不配平。',
+        'verify.summary': '{errors} 个错误 · {warnings} 个警告',
+        'verify.more': '还有 {n} 条未显示',
+        'create.title': '新建工程',
+        'create.template': '模板工程',
+        'create.name': '工程名',
+        'create.output': '输出路径',
+        'create.outputHint': '留空则写到模板同目录',
+        'create.variablesMode': '全局变量表',
+        'create.pouName': '新增 POU 名称（可选）',
+        'create.pouBody': 'ST 正文',
+        'create.compile': '生成后原厂编译（需 UAC）',
+        'create.submit': '生成',
+        'create.cancel': '取消',
+        'create.running': '生成中…',
+        'create.success': '已生成：{path}',
+        'create.error': '生成失败：{error}',
+        'create.modeReplace': '替换',
+        'create.modeMerge': '合并',
+        'create.modeKeep': '保留',
+        'variables.download': '下载变量 CSV',
+        'variables.name': '名称',
+        'variables.type': '数据类型',
+        'variables.address': '地址',
+        'variables.scope': '作用域',
+        'programs.hint': '选择 POU 查看程序正文',
+        'programs.empty': '该工程没有可读的 POU',
+        'programs.noRungs': '该段没有可读梯级',
+        'programs.noTasks': '没有任务信息',
+        'programs.noTables': '没有变量表',
+        'programs.truncated': '只显示前 {shown} 级，共 {total} 级',
+        'programs.st': 'ST 源码',
+        'programs.ladder': '梯形图',
+        'programs.mixed': '混合',
+        'programs.sections': '{n} 段',
+        'programs.rungs': '{n} 级',
+        'programs.lines': '{n} 行',
+        'st.download': '生成并下载 Sysmac XML',
+        'st.downloadPlcopen': '下载 PLCopen XML',
+        'st.formatHint': 'Sysmac 导入用 IEC 61131-10；PLCopen TC6 2.01 是厂商中立的通用 XML，两者都由同一份 .st 生成。',
+        'st.converting': '正在生成…',
+        'st.failed': '转换失败：{error}',
+        'st.blocks': '识别到 {n} 个块',
+        'st.blocksLabel': '块',
+        'st.sourceTruncated': '源码仅预览前 {n} 字符',
+        'st.hint': '输出为 IEC 61131-10 XML，可直接在 Sysmac Studio 中导入。',
+        'tia.hint': '博途工程由博途自身管理，需要通过 TIA Openness 读取或修改。',
+        'tia.plan': '复制 Openness 指令',
+        'tia.readiness': 'Openness 状态：{text}',
+        'tia.noteLocal': '博途工程由博途自身管理；读取或修改需要 TIA Openness。',
+        'tia.readDevices': '读取设备与块',
+        'tia.reading': '正在通过 Openness 读取…',
+        'tia.device': '设备',
+        'tia.blocks': '块',
+        'tia.types': '数据类型',
+        'tia.openHint': '首次读取可能弹出「Openness 访问」提示，选「全部确定」即可。',
+        'copy': '复制指令',
+        'copied': '已复制',
+        'copyFailed': '复制失败，请手动选中',
+        'copy.sysmac': '用 plc_sysmac 读取工程「{path}」：先给控制器、POU 和变量表概览；需要改程序时，请给我改好的 ST 片段和变量 CSV（.smc2 只读，我不会直接改它）。',
+        'copy.tia': '用 plc_tia 打开博途工程「{path}」：先用 action=plan、operation=list 生成并审查命令，确认后用 action=run、operation=list 列出设备和 PLC 块。',
+        'download.failed': '下载失败：{error}',
+        'error.prefix': '读取失败：{error}',
+      },
+      en: {
+        'nav.label': 'PLC workspace',
+        title: 'PLC workspace',
+        subtitle: 'OMRON Sysmac Studio · Siemens TIA Portal',
+        refresh: 'Refresh',
+        loading: 'Loading…',
+        retry: 'Retry',
+        close: 'Close',
+        'status.ready': 'Ready',
+        'status.loading': 'Reading',
+        'status.checking': 'Checking',
+        'status.error': 'Failed',
+        'card.checking': 'Checking…',
+        'card.sysmac': 'OMRON Sysmac Studio',
+        'card.tia': 'TIA Portal Openness',
+        'card.st': 'ST → Sysmac XML',
+        'card.installed': 'Installed',
+        'card.notInstalled': 'Not installed',
+        'card.offline': 'Offline .smc2 reading works',
+        'card.opennessReady': 'Openness ready',
+        'card.opennessMissing': 'Openness assembly not found',
+        'card.userGroup': 'User group: {state}',
+        'card.member': 'member',
+        'card.notMember': 'not a member',
+        'card.unknown': 'unknown',
+        'card.converterReady': 'Converter ready ({python})',
+        'card.converterMissing': 'Python 3 not found',
+        'card.converterHint': 'Turns .st sources into Sysmac-importable IEC 61131-10 XML',
+        'list.title': 'Projects',
+        'list.search': 'Filter by name or path',
+        'list.empty': 'No projects found',
+        'list.emptyFiltered': 'No project matches this filter',
+        'list.generatedAt': 'Scanned {time}',
+        'list.emptyHint': 'Place .smc2, TIA project folders, or .st sources under a scanned folder, then refresh.',
+        'list.roots': '{n} scanned folders',
+        'list.truncated': 'Scan hit its limit; results may be incomplete',
+        'list.counts': '{sysmac} .smc2 · {tia} TIA · {st} .st',
+        'detail.emptyTitle': 'Select a project',
+        'detail.errorTitle': 'Read failed',
+        'detail.emptyBody': 'Pick a .smc2 project to read its controller, variables and ST programs; pick a .st source to build the Sysmac-importable XML.',
+        'detail.emptyHint': 'Or drive it from the conversation: plc_env / plc_sysmac / plc_st / plc_tia',
+        'detail.rootsConfig': 'Scanned folders come from the agentplc.projectRoots setting in the profile cordis.patch.yml.',
+        'tab.overview': 'Overview',
+        'tab.variables': 'Variables',
+        'tab.programs': 'Programs',
+        'meta.controller': 'Controller',
+        'meta.compiler': 'Compiler',
+        'meta.pous': 'POUs',
+        'meta.variables': 'Variables',
+        'meta.tables': 'Tables',
+        'meta.tasks': 'Tasks',
+        'meta.size': 'Size',
+        'meta.modified': 'Modified',
+        'meta.entries': 'Entries',
+        'meta.guid': 'Project GUID',
+        'meta.language': 'Language',
+        'meta.type': 'Type',
+        'meta.lines': 'Body',
+        'meta.unknown': 'unknown',
+        'overview.tasks': 'Tasks',
+        'overview.tables': 'Variable tables',
+        'overview.notes': 'Parse notes',
+        'overview.noNotes': 'No anomalies while reading this project.',
+        'overview.pous': 'Program organization units',
+        'variables.search': 'Search name / type / address / comment',
+        'variables.count': '{total} rows, showing {shown}',
+        'variables.sampleNote': '{total} rows; showing {shown} of the first {sample} sampled rows — download the CSV for the complete table',
+        'variables.empty': 'No matching variables',
+        'verify.title': 'Static check',
+        'verify.run': 'Run check',
+        'verify.running': 'Checking…',
+        'verify.clean': 'No undeclared names, duplicate variables, address conflicts or unbalanced blocks were found.',
+        'verify.summary': '{errors} error(s) · {warnings} warning(s)',
+        'verify.more': '{n} more not shown',
+        'create.title': 'New project',
+        'create.template': 'Template project',
+        'create.name': 'Project name',
+        'create.output': 'Output path',
+        'create.outputHint': 'Leave empty to write next to the template',
+        'create.variablesMode': 'Global variable table',
+        'create.pouName': 'New POU name (optional)',
+        'create.pouBody': 'ST body',
+        'create.compile': 'Run vendor compile after creating (needs UAC)',
+        'create.submit': 'Create',
+        'create.cancel': 'Cancel',
+        'create.running': 'Creating…',
+        'create.success': 'Created: {path}',
+        'create.error': 'Create failed: {error}',
+        'create.modeReplace': 'Replace',
+        'create.modeMerge': 'Merge',
+        'create.modeKeep': 'Keep',
+        'variables.download': 'Download variable CSV',
+        'variables.name': 'Name',
+        'variables.type': 'Data type',
+        'variables.address': 'Address',
+        'variables.scope': 'Scope',
+        'programs.hint': 'Select a POU to read its body',
+        'programs.empty': 'This project has no readable POU',
+        'programs.noRungs': 'This section has no readable rungs',
+        'programs.noTasks': 'No task information',
+        'programs.noTables': 'No variable tables',
+        'programs.truncated': 'Showing the first {shown} of {total} rungs',
+        'programs.st': 'ST source',
+        'programs.ladder': 'Ladder',
+        'programs.mixed': 'Mixed',
+        'programs.sections': '{n} sections',
+        'programs.rungs': '{n} rungs',
+        'programs.lines': '{n} lines',
+        'st.download': 'Build and download Sysmac XML',
+        'st.downloadPlcopen': 'Download PLCopen XML',
+        'st.formatHint': 'IEC 61131-10 is what Sysmac Studio imports; PLCopen TC6 2.01 is the vendor-neutral XML. Both come from the same .st source.',
+        'st.converting': 'Building…',
+        'st.failed': 'Conversion failed: {error}',
+        'st.blocks': '{n} blocks detected',
+        'st.blocksLabel': 'blocks',
+        'st.sourceTruncated': 'Showing the first {n} characters of the source',
+        'st.hint': 'The output is IEC 61131-10 XML and imports directly in Sysmac Studio.',
+        'tia.hint': 'TIA Portal projects are owned by TIA Portal; read or change them through TIA Openness.',
+        'tia.plan': 'Copy Openness command',
+        'tia.readiness': 'Openness state: {text}',
+        'tia.noteLocal': 'TIA Portal owns this project; reading or changing it requires TIA Openness.',
+        'tia.readDevices': 'Read devices and blocks',
+        'tia.reading': 'Reading through Openness…',
+        'tia.device': 'Device',
+        'tia.blocks': 'blocks',
+        'tia.types': 'types',
+        'tia.openHint': 'The first read may show an "Openness access" prompt; choose "Allow all".',
+        'copy': 'Copy prompt',
+        'copied': 'Copied',
+        'copyFailed': 'Copy failed; select the text manually',
+        'copy.sysmac': 'Use plc_sysmac to read the project "{path}": summarise the controller, POUs and variable tables first. When the program must change, give me the edited ST and a variable CSV — .smc2 stays read-only.',
+        'copy.tia': 'Use plc_tia on the TIA project "{path}": first action=plan, operation=list to generate and review the command, then action=run, operation=list to list devices and PLC blocks.',
+        'download.failed': 'Download failed: {error}',
+        'error.prefix': 'Read failed: {error}',
+      },
+    }
+
+    const CSS = `
+.ap-root {
+  --ap-mono: ui-monospace, "Cascadia Code", "JetBrains Mono", Consolas, monospace;
+  --ap-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  background: var(--dsw-alias-bg-base);
+  color: var(--dsw-alias-label-primary);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.ap-root *, .ap-root *::before, .ap-root *::after { box-sizing: border-box; }
+.ap-root button { font-family: inherit; }
+
+/* ---------------------------------------------------------------- header */
+.ap-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 18px 24px 14px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--dsw-alias-brand-primary) 7%, transparent), transparent);
+}
+.ap-brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.ap-brand-mark {
+  width: 38px; height: 38px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 11px;
+  border: 1px solid color-mix(in srgb, var(--dsw-alias-brand-primary) 30%, transparent);
+  background: color-mix(in srgb, var(--dsw-alias-brand-primary) 12%, transparent);
+  color: var(--dsw-alias-brand-primary);
+}
+.ap-title { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.ap-title-main { font-size: 17px; font-weight: 650; letter-spacing: 0.01em; }
+.ap-title-sub { color: var(--dsw-alias-label-secondary); font-size: 11.5px; }
+.ap-header-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.ap-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 10px; border-radius: 999px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  background: var(--dsw-alias-bg-layer-1);
+  color: var(--dsw-alias-label-secondary);
+  font-size: 11px; white-space: nowrap;
+}
+.ap-icon-btn {
+  width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid var(--dsw-alias-border-l1); border-radius: 8px;
+  background: var(--dsw-alias-bg-layer-1); color: var(--dsw-alias-label-secondary);
+  cursor: pointer; transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
+}
+.ap-icon-btn:hover { background: var(--dsw-alias-bg-layer-2); color: var(--dsw-alias-label-primary); border-color: var(--dsw-alias-border-l2); }
+
+/* dots */
+.ap-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--dsw-alias-state-idle-primary); flex-shrink: 0; }
+.ap-dot.ok { background: var(--dsw-alias-state-success-primary); }
+.ap-dot.warn { background: var(--dsw-alias-state-warn-primary); }
+.ap-dot.error { background: var(--dsw-alias-state-error-primary); }
+
+/* ------------------------------------------------------------ status strip */
+.ap-status {
+  display: flex; align-items: stretch; flex-wrap: wrap;
+  margin: 0 24px 16px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: var(--ap-radius);
+  background: var(--dsw-alias-bg-layer-1);
+  overflow: hidden;
+}
+.ap-status-item { display: flex; align-items: center; gap: 9px; padding: 11px 16px; flex: 1 1 200px; min-width: 0; }
+.ap-status-item + .ap-status-item { border-left: 1px solid var(--dsw-alias-border-l1); }
+.ap-status-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.ap-status-label { color: var(--dsw-alias-label-secondary); font-size: 10.5px; letter-spacing: 0.03em; text-transform: uppercase; }
+.ap-status-value { font-size: 12.5px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ap-status-counts { display: flex; align-items: center; gap: 16px; padding: 11px 16px; border-left: 1px solid var(--dsw-alias-border-l1); background: var(--dsw-alias-bg-layer-2); }
+.ap-count { display: inline-flex; align-items: baseline; gap: 4px; font-size: 11px; color: var(--dsw-alias-label-secondary); white-space: nowrap; }
+.ap-count b { font-size: 14px; font-weight: 650; color: var(--dsw-alias-label-primary); }
+
+/* ---------------------------------------------------------------- layout */
+.ap-body {
+  display: grid; grid-template-columns: 316px minmax(0, 1fr);
+  gap: 16px; flex: 1; min-height: 0; padding: 0 24px 20px;
+}
+.ap-list, .ap-detail {
+  min-height: 0;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: var(--ap-radius);
+  background: var(--dsw-alias-bg-layer-1);
+}
+.ap-list { display: flex; flex-direction: column; overflow: hidden; }
+.ap-list-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; padding: 14px 16px 8px; }
+.ap-list-title { font-size: 11px; font-weight: 650; letter-spacing: 0.07em; text-transform: uppercase; color: var(--dsw-alias-label-secondary); }
+.ap-list-count { font-size: 11px; color: var(--dsw-alias-label-secondary); font-variant-numeric: tabular-nums; }
+.ap-search-wrap { padding: 0 12px 10px; }
+.ap-search {
+  width: 100%; border: 1px solid var(--dsw-alias-border-l1); border-radius: 8px;
+  background: var(--dsw-alias-bg-base); color: var(--dsw-alias-label-primary);
+  padding: 7px 10px; font-size: 12px; font-family: inherit;
+  transition: border-color 120ms ease;
+}
+.ap-search::placeholder { color: var(--dsw-alias-label-secondary); }
+.ap-search:focus { outline: none; border-color: var(--dsw-alias-brand-primary); }
+.ap-search-wrap + .ap-projects { padding-top: 2px; }
+.ap-projects { flex: 1; overflow: auto; padding: 0 8px 8px; display: flex; flex-direction: column; gap: 2px; }
+.ap-project {
+  display: flex; flex-direction: column; gap: 3px;
+  padding: 8px 10px; border-radius: 8px;
+  border: 1px solid transparent; background: transparent;
+  text-align: left; cursor: pointer; color: inherit; font-family: inherit;
+  transition: background 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
+}
+.ap-project:hover { background: var(--dsw-alias-bg-layer-2); }
+.ap-project.selected {
+  background: var(--dsw-alias-bg-layer-2);
+  background: color-mix(in srgb, var(--dsw-alias-brand-primary) 10%, var(--dsw-alias-bg-layer-1));
+  border-color: color-mix(in srgb, var(--dsw-alias-brand-primary) 35%, transparent);
+  box-shadow: inset 2px 0 0 var(--dsw-alias-brand-primary);
+}
+.ap-project-top { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.ap-project-name { font-size: 12.5px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ap-project-meta { color: var(--dsw-alias-label-secondary); font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ap-tag {
+  flex-shrink: 0; font-size: 9.5px; font-weight: 600; letter-spacing: 0.05em;
+  padding: 1px 6px; border-radius: 5px; border: 1px solid var(--dsw-alias-border-l2);
+  color: var(--dsw-alias-label-secondary); text-transform: uppercase;
+}
+.ap-tag.sysmac {
+  color: var(--dsw-alias-brand-primary);
+  border-color: color-mix(in srgb, var(--dsw-alias-brand-primary) 45%, transparent);
+  background: color-mix(in srgb, var(--dsw-alias-brand-primary) 12%, transparent);
+}
+.ap-tag.st {
+  color: var(--dsw-alias-state-success-primary);
+  border-color: color-mix(in srgb, var(--dsw-alias-state-success-primary) 45%, transparent);
+  background: color-mix(in srgb, var(--dsw-alias-state-success-primary) 12%, transparent);
+}
+.ap-tag.tia {
+  color: var(--dsw-alias-state-warn-primary);
+  border-color: color-mix(in srgb, var(--dsw-alias-state-warn-primary) 45%, transparent);
+  background: color-mix(in srgb, var(--dsw-alias-state-warn-primary) 12%, transparent);
+}
+.ap-list-foot {
+  color: var(--dsw-alias-label-secondary); font-size: 10.5px;
+  padding: 8px 16px 10px; border-top: 1px solid var(--dsw-alias-border-l1);
+  line-height: 1.55; display: flex; flex-direction: column; gap: 1px;
+}
+.ap-list-note { display: flex; flex-direction: column; gap: 6px; padding: 10px 8px; }
+.ap-skeleton { height: 46px; border-radius: 8px; background: var(--dsw-alias-bg-layer-2); }
+.ap-skeleton + .ap-skeleton { margin-top: 4px; }
+.ap-skeleton.line { height: 12px; border-radius: 6px; }
+
+/* ---------------------------------------------------------------- detail */
+.ap-detail { overflow: auto; padding: 16px 18px 18px; display: flex; flex-direction: column; gap: 14px; }
+.ap-detail-head { display: flex; flex-direction: column; gap: 7px; }
+.ap-detail-title { display: flex; align-items: center; gap: 9px; min-width: 0; }
+.ap-detail-name { font-size: 16px; font-weight: 650; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ap-path {
+  align-self: flex-start; max-width: 100%;
+  color: var(--dsw-alias-label-secondary); font-family: var(--ap-mono); font-size: 10.5px;
+  background: var(--dsw-alias-bg-layer-2); border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 6px; padding: 3px 7px; overflow-wrap: anywhere;
+}
+.ap-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.ap-download { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
+.ap-btn {
+  appearance: none; display: inline-flex; align-items: center; gap: 6px;
+  border: 1px solid var(--dsw-alias-border-l2); background: var(--dsw-alias-bg-base);
+  color: var(--dsw-alias-label-primary); border-radius: 8px; padding: 6px 12px;
+  font-size: 12px; font-weight: 500; cursor: pointer;
+  transition: border-color 120ms ease, background 120ms ease, color 120ms ease;
+}
+.ap-btn:hover { border-color: var(--dsw-alias-brand-primary); color: var(--dsw-alias-brand-primary); }
+.ap-btn:disabled { opacity: 0.55; cursor: default; }
+.ap-btn.primary {
+  border-color: color-mix(in srgb, var(--dsw-alias-brand-primary) 60%, transparent);
+  background: color-mix(in srgb, var(--dsw-alias-brand-primary) 14%, transparent);
+  color: var(--dsw-alias-brand-primary);
+}
+.ap-btn.primary:hover { background: color-mix(in srgb, var(--dsw-alias-brand-primary) 22%, transparent); }
+
+.ap-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(118px, 1fr)); gap: 8px; }
+.ap-cell {
+  display: flex; flex-direction: column; gap: 2px; min-width: 0;
+  padding: 9px 11px; border-radius: 9px;
+  border: 1px solid var(--dsw-alias-border-l1); background: var(--dsw-alias-bg-layer-2);
+}
+.ap-cell-label { color: var(--dsw-alias-label-secondary); font-size: 10px; letter-spacing: 0.04em; text-transform: uppercase; }
+.ap-cell-value { font-size: 12.5px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.ap-tabs {
+  display: inline-flex; gap: 2px; align-self: flex-start; padding: 3px;
+  border-radius: 9px; background: var(--dsw-alias-bg-layer-2);
+  border: 1px solid var(--dsw-alias-border-l1);
+}
+.ap-tab {
+  appearance: none; border: 1px solid transparent; background: transparent;
+  color: var(--dsw-alias-label-secondary); font-size: 12px; padding: 4px 12px;
+  border-radius: 7px; cursor: pointer; transition: color 120ms ease, background 120ms ease;
+}
+.ap-tab:hover { color: var(--dsw-alias-label-primary); }
+.ap-tab.active {
+  background: var(--dsw-alias-bg-base); color: var(--dsw-alias-label-primary);
+  border-color: var(--dsw-alias-border-l1); font-weight: 550;
+}
+
+.ap-section { display: flex; flex-direction: column; gap: 8px; }
+.ap-section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.ap-section-title { font-size: 10.5px; font-weight: 650; color: var(--dsw-alias-label-secondary); text-transform: uppercase; letter-spacing: 0.07em; }
+.ap-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.ap-chip {
+  border: 1px solid var(--dsw-alias-border-l1); border-radius: 7px;
+  padding: 2px 9px; font-size: 11.5px; color: var(--dsw-alias-label-secondary);
+  background: var(--dsw-alias-bg-base);
+}
+.ap-note {
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-left: 3px solid var(--dsw-alias-state-warn-primary);
+  border-radius: 7px; padding: 8px 11px;
+  color: var(--dsw-alias-label-secondary); font-size: 11.5px; line-height: 1.55;
+  background: var(--dsw-alias-bg-layer-2);
+}
+.ap-issues { display: flex; flex-direction: column; gap: 4px; max-height: 30vh; overflow: auto; }
+.ap-issue {
+  font-family: var(--ap-mono); font-size: 11px; line-height: 1.5;
+  padding: 5px 9px; border-radius: 6px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  background: var(--dsw-alias-bg-base);
+  overflow-wrap: anywhere;
+}
+.ap-issue.error {
+  color: var(--dsw-alias-state-error-primary);
+  border-color: color-mix(in srgb, var(--dsw-alias-state-error-primary) 40%, transparent);
+}
+.ap-issue.warning {
+  color: var(--dsw-alias-state-warn-primary);
+  border-color: color-mix(in srgb, var(--dsw-alias-state-warn-primary) 40%, transparent);
+}
+.ap-modal {
+  position: fixed; inset: 0; z-index: 60;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0, 0, 0, 0.45);
+}
+.ap-modal-card {
+  width: min(660px, 92vw); max-height: 86vh; overflow: auto;
+  display: flex; flex-direction: column; gap: 10px;
+  padding: 16px; border-radius: 12px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  background: var(--dsw-alias-bg-layer-1);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.35);
+}
+.ap-modal-head { display: flex; align-items: center; justify-content: space-between; font-weight: 600; }
+.ap-field { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--dsw-alias-label-secondary); }
+.ap-field input, .ap-field select, .ap-field textarea {
+  font: inherit; font-family: var(--ap-mono); font-size: 12px;
+  padding: 6px 8px; border-radius: 6px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  background: var(--dsw-alias-bg-base);
+  color: var(--dsw-alias-label-primary);
+}
+.ap-field textarea { min-height: 110px; resize: vertical; }
+.ap-modal-actions { display: flex; justify-content: flex-end; gap: 8px; }
+.ap-check { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--dsw-alias-label-secondary); }
+.ap-btn.primary { border-color: color-mix(in srgb, var(--dsw-alias-brand-primary) 55%, transparent); color: var(--dsw-alias-brand-primary); }
+
+/* tables */
+.ap-table-wrap { border: 1px solid var(--dsw-alias-border-l1); border-radius: 9px; overflow: auto; max-height: 46vh; }
+.ap-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.ap-table th {
+  position: sticky; top: 0; z-index: 1;
+  background: var(--dsw-alias-bg-layer-2); color: var(--dsw-alias-label-secondary);
+  font-weight: 550; font-size: 10.5px; letter-spacing: 0.04em; text-transform: uppercase;
+  text-align: left; padding: 8px 11px; border-bottom: 1px solid var(--dsw-alias-border-l1); white-space: nowrap;
+}
+.ap-table td { padding: 7px 11px; border-bottom: 1px solid var(--dsw-alias-border-l1); vertical-align: top; }
+.ap-table tbody tr:hover { background: var(--dsw-alias-bg-layer-2); }
+.ap-table tr:last-child td { border-bottom: none; }
+.ap-table td.mono { font-family: var(--ap-mono); font-size: 10.5px; color: var(--dsw-alias-label-secondary); }
+
+/* programs */
+.ap-pou-list { display: flex; flex-direction: column; gap: 5px; }
+.ap-pou {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 8px 11px; border-radius: 8px;
+  border: 1px solid var(--dsw-alias-border-l1); background: var(--dsw-alias-bg-base);
+  cursor: pointer; color: inherit; font-family: inherit; text-align: left;
+  transition: border-color 120ms ease, background 120ms ease;
+}
+.ap-pou:hover { border-color: var(--dsw-alias-border-l2); background: var(--dsw-alias-bg-layer-2); }
+.ap-pou.active {
+  border-color: color-mix(in srgb, var(--dsw-alias-brand-primary) 55%, transparent);
+  background: color-mix(in srgb, var(--dsw-alias-brand-primary) 10%, var(--dsw-alias-bg-layer-1));
+}
+.ap-pou-name { font-size: 12.5px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ap-pou-meta { color: var(--dsw-alias-label-secondary); font-size: 10.5px; flex-shrink: 0; }
+
+/* code and rungs */
+.ap-code {
+  margin: 0; padding: 12px 14px;
+  border: 1px solid var(--dsw-alias-border-l1); border-radius: 9px;
+  background: var(--dsw-alias-bg-base); color: var(--dsw-alias-label-primary);
+  font-family: var(--ap-mono); font-size: 11.5px; line-height: 1.7;
+  max-height: 48vh; overflow: auto; white-space: pre; tab-size: 4;
+}
+.ap-rungs {
+  display: flex; flex-direction: column; gap: 5px; max-height: 48vh; overflow: auto;
+  font-family: var(--ap-mono); font-size: 11.5px;
+}
+.ap-rung {
+  display: flex; gap: 9px; padding: 7px 10px; border-radius: 8px;
+  background: var(--dsw-alias-bg-base); border: 1px solid var(--dsw-alias-border-l1);
+}
+.ap-rung-index {
+  flex-shrink: 0; align-self: flex-start;
+  font-size: 10px; color: var(--dsw-alias-label-secondary);
+  background: var(--dsw-alias-bg-layer-2); border-radius: 5px; padding: 1px 6px;
+}
+.ap-rung-body { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.ap-rung-st summary { cursor: pointer; color: var(--dsw-alias-label-secondary); font-size: 10px; letter-spacing: 0.05em; }
+.ap-rung-st pre { margin-top: 6px; max-height: 26vh; }
+
+/* empty and feedback */
+.ap-empty-wrap { display: flex; align-items: center; justify-content: center; height: 100%; padding: 28px 20px; }
+.ap-empty { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; max-width: 460px; color: var(--dsw-alias-label-secondary); line-height: 1.6; }
+.ap-empty-icon {
+  width: 54px; height: 54px; margin-bottom: 4px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 15px;
+  border: 1px solid color-mix(in srgb, var(--dsw-alias-brand-primary) 30%, transparent);
+  background: color-mix(in srgb, var(--dsw-alias-brand-primary) 12%, transparent);
+  color: var(--dsw-alias-brand-primary);
+}
+.ap-empty-title { font-size: 15px; font-weight: 650; color: var(--dsw-alias-label-primary); }
+.ap-empty-body { font-size: 12px; }
+.ap-hint { color: var(--dsw-alias-label-secondary); font-size: 11.5px; line-height: 1.6; }
+.ap-error {
+  border: 1px solid color-mix(in srgb, var(--dsw-alias-state-error-primary) 45%, transparent);
+  border-radius: 9px; padding: 10px 12px;
+  color: var(--dsw-alias-state-error-primary); font-size: 12px;
+  background: color-mix(in srgb, var(--dsw-alias-state-error-primary) 8%, transparent);
+}
+.ap-error-bar { margin: 0 24px 12px; }
+.ap-spinner { color: var(--dsw-alias-label-secondary); font-size: 12px; padding: 12px 0; }
+
+/* focus */
+.ap-root button:focus-visible, .ap-root input:focus-visible, .ap-root a:focus-visible, .ap-root summary:focus-visible {
+  outline: 2px solid var(--dsw-alias-brand-primary);
+  outline-offset: 2px;
+}
+
+@media (max-width: 980px) {
+  .ap-body { grid-template-columns: 270px minmax(0, 1fr); }
+}
+@media (max-width: 860px) {
+  .ap-body { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(160px, 34%) minmax(0, 1fr); }
+  .ap-list { max-height: 36vh; }
+  .ap-top, .ap-status { padding-left: 16px; padding-right: 16px; }
+  .ap-status { margin: 0 16px 14px; }
+  .ap-body { padding: 0 16px 16px; }
+  .ap-error-bar { margin: 0 16px 12px; }
+  .ap-status-item { flex-basis: 100%; border-left: none; }
+  .ap-status-item + .ap-status-item { border-left: none; border-top: 1px solid var(--dsw-alias-border-l1); }
+  .ap-status-counts { border-left: none; border-top: 1px solid var(--dsw-alias-border-l1); }
+}
+@media (max-width: 640px) {
+  .ap-code { white-space: pre-wrap; overflow-wrap: anywhere; }
+  .ap-table-wrap { max-height: 38vh; }
+  .ap-status-counts { flex-wrap: wrap; gap: 10px; }
+}
+`
+
+    function interpolate(text, params) {
+      if (!params) return text
+      return String(text).replace(/\{(\w+)\}/g, (match, key) => (params[key] === undefined ? match : String(params[key])))
+    }
+
+    let localeDictionaryRegistered = false
+
+    /** Register the panel dictionaries once the locale service exists; safe to call repeatedly. */
+    function registerLocaleDictionary(ctx) {
+      if (localeDictionaryRegistered) return
+      const locale = ctx.get('locale')
+      if (!locale || typeof locale.register !== 'function') return
+      try {
+        ctx.effect(() => locale.register(NS, { zh: DICT.zh, en: DICT.en }), 'agentplc:locale')
+      } catch {
+        // Another generation already owns this namespace; the local fallback still renders.
+      }
+      localeDictionaryRegistered = true
+    }
+
+    function localText(locale, key) {
+      const active = (locale && typeof locale.getLocale === 'function' && locale.getLocale().active) || navigator.language || 'en'
+      const table = String(active).toLowerCase().startsWith('zh') ? DICT.zh : DICT.en
+      return table[key] ?? DICT.en[key] ?? key
+    }
+
+    function createTranslate(ctx) {
+      const locale = ctx.get('locale')
+      if (!locale || typeof locale.bind !== 'function') {
+        return (key, params) => interpolate(localText(locale, key), params)
+      }
+      let bound
+      try {
+        bound = locale.bind(NS)
+      } catch {
+        bound = undefined
+      }
+      return (key, params) => {
+        let text
+        if (bound) {
+          try {
+            text = bound(key, params)
+          } catch {
+            text = undefined
+          }
+        }
+        // A missing dictionary returns the key itself; fall back to the bundled copy.
+        if (typeof text !== 'string' || text === '' || text === key) text = localText(locale, key)
+        return interpolate(text, params)
+      }
+    }
+
+    function useTranslate(ctx) {
+      const locale = ctx.get('locale')
+      const [, setRevision] = React.useState(0)
+      React.useEffect(() => {
+        if (!locale || typeof locale.subscribe !== 'function') return undefined
+        return locale.subscribe(() => setRevision((value) => value + 1))
+      }, [locale])
+      // The bound translator reads the active locale at call time, so the subscription
+      // above is what makes a language switch visible; the memo only avoids rebuilding it.
+      return React.useMemo(() => createTranslate(ctx), [ctx, locale])
+    }
+
+    async function getJson(url, signal) {
+      const response = await fetch(url, { signal, credentials: 'same-origin', headers: { accept: 'application/json' } })
+      const text = await response.text()
+      let data
+      try {
+        data = JSON.parse(text)
+      } catch {
+        throw new Error(text.slice(0, 160) || `HTTP ${response.status}`)
+      }
+      if (data && data.error) throw new Error(data.error)
+      if (!response.ok && !(data && data.ok)) throw new Error(`HTTP ${response.status}`)
+      return data
+    }
+
+    /** Download a generated file without navigating away when the server answers with an error. */
+    async function downloadFile(url, fallbackName) {
+      const response = await fetch(url, { credentials: 'same-origin' })
+      if (!response.ok) {
+        let message = `HTTP ${response.status}`
+        try {
+          const data = await response.json()
+          if (data && data.error) message = data.error
+        } catch {
+          // A non-JSON error body keeps the status text.
+        }
+        throw new Error(message)
+      }
+      const blob = await response.blob()
+      const disposition = response.headers.get('content-disposition') ?? ''
+      const named = /filename\*=UTF-8''([^;]+)/i.exec(disposition)
+      const fileName = named ? decodeURIComponent(named[1]) : fallbackName
+      const objectUrl = URL.createObjectURL(blob)
+      const anchor = document.createElement('a')
+      anchor.href = objectUrl
+      anchor.download = fileName
+      anchor.rel = 'noopener'
+      anchor.click()
+      setTimeout(() => URL.revokeObjectURL(objectUrl), 5000)
+      return fileName
+    }
+
+    function formatBytes(bytes) {
+      if (typeof bytes !== 'number' || !Number.isFinite(bytes)) return '—'
+      if (bytes < 1024) return `${bytes} B`
+      const units = ['KB', 'MB', 'GB']
+      let value = bytes / 1024
+      let index = 0
+      while (value >= 1024 && index < units.length - 1) {
+        value /= 1024
+        index += 1
+      }
+      return `${value.toFixed(value >= 10 ? 0 : 1)} ${units[index]}`
+    }
+
+    function formatDate(iso) {
+      if (!iso) return '—'
+      const date = new Date(iso)
+      if (Number.isNaN(date.getTime())) return iso
+      return date.toLocaleString(undefined, { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+    }
+
+    function StatusPill({ status, t }) {
+      const labels = {
+        checking: t('status.checking'),
+        loading: t('status.loading'),
+        ready: t('status.ready'),
+        error: t('status.error'),
+      }
+      const tone = status === 'ready' ? 'ok' : status === 'error' ? 'error' : ''
+      return h(
+        'span',
+        { className: 'ap-pill', role: 'status', 'aria-live': 'polite' },
+        h('span', { className: `ap-dot ${tone}` }),
+        labels[status] ?? labels.loading,
+      )
+    }
+
+    function ToolchainCards({ data, t }) {
+      const checking = !data
+      const environment = data?.environment
+      const tia = environment?.tiaPortal
+      const sysmac = environment?.sysmacStudio
+      const converter = data?.converter
+      const item = (tone, label, value) =>
+        h(
+          'div',
+          { className: 'ap-status-item', key: label },
+          h('span', { className: `ap-dot ${checking ? '' : tone}` }),
+          h('div', { className: 'ap-status-text' }, h('span', { className: 'ap-status-label' }, label), h('span', { className: 'ap-status-value' }, value)),
+        )
+      const counts = data?.counts ?? { sysmac: 0, tia: 0, st: 0 }
+      return h(
+        'section',
+        { className: 'ap-status' },
+        item(
+          sysmac?.installed ? 'ok' : 'warn',
+          t('card.sysmac'),
+          checking ? t('card.checking') : sysmac?.installed ? t('card.installed') : t('card.notInstalled'),
+        ),
+        item(
+          tia?.opennessReady ? 'ok' : tia?.installed ? 'warn' : '',
+          t('card.tia'),
+          checking
+            ? t('card.checking')
+            : tia?.installed
+              ? tia.opennessReady
+                ? `${(tia.installs ?? []).map((install) => install.version).join(' / ') || tia.latest} · ${t('card.opennessReady')}`
+                : t('card.opennessMissing')
+              : t('card.notInstalled'),
+        ),
+        item(
+          converter?.ready && converter?.python ? 'ok' : 'warn',
+          t('card.st'),
+          checking ? t('card.checking') : converter?.python ? t('card.converterReady', { python: converter.python }) : t('card.converterMissing'),
+        ),
+        h(
+          'div',
+          { className: 'ap-status-counts' },
+          ['sysmac', 'tia', 'st'].map((kind) =>
+            h('span', { className: 'ap-count', key: kind }, h('b', null, String(counts[kind] ?? 0)), KIND_LABEL[kind]),
+          ),
+        ),
+      )
+    }
+
+    const KIND_LABEL = { sysmac: 'SMC2', tia: 'TIA', st: 'ST' }
+
+    function ProjectList({ data, query, selectedPath, onSelect, t }) {
+      const projects = (data?.projects ?? []).filter((project) => {
+        if (!query) return true
+        const needle = query.toLowerCase()
+        return project.name.toLowerCase().includes(needle) || project.path.toLowerCase().includes(needle)
+      })
+      return h(
+        'aside',
+        { className: 'ap-list' },
+        h(
+          'div',
+          { className: 'ap-list-head' },
+          h('span', { className: 'ap-list-title' }, t('list.title')),
+          h('span', { className: 'ap-list-count' }, String(projects.length)),
+        ),
+        h(
+          'div',
+          { className: 'ap-search-wrap' },
+          h('input', {
+            className: 'ap-search',
+            value: query,
+            placeholder: t('list.search'),
+            'aria-label': t('list.search'),
+            onChange: (event) => onSelect({ query: event.target.value }),
+          }),
+        ),
+        h(
+          'div',
+          { className: 'ap-projects' },
+          !data
+            ? [0, 1, 2, 3, 4].map((index) => h('div', { className: 'ap-skeleton', key: index }))
+            : projects.length === 0
+              ? h(
+                  'div',
+                  { className: 'ap-list-note' },
+                  h('div', { className: 'ap-hint' }, query ? t('list.emptyFiltered') : t('list.empty')),
+                  query ? null : h('div', { className: 'ap-hint' }, t('list.emptyHint')),
+                )
+              : projects.map((project) =>
+                  h(
+                    'button',
+                    {
+                      key: project.path,
+                      type: 'button',
+                      className: `ap-project${selectedPath === project.path ? ' selected' : ''}`,
+                      onClick: () => onSelect({ path: project.path }),
+                      title: project.path,
+                      'aria-current': selectedPath === project.path ? 'true' : undefined,
+                    },
+                    h(
+                      'div',
+                      { className: 'ap-project-top' },
+                      h('span', { className: `ap-tag ${project.kind}` }, KIND_LABEL[project.kind] ?? project.kind),
+                      h('span', { className: 'ap-project-name' }, project.name),
+                    ),
+                    h(
+                      'div',
+                      { className: 'ap-project-meta' },
+                      `${formatDate(project.modifiedAt)} · ${project.version ?? (project.kind === 'st' ? 'ST source' : formatBytes(project.sizeBytes))}`,
+                    ),
+                  ),
+                ),
+        ),
+        h(
+          'div',
+          { className: 'ap-list-foot' },
+          data ? h('div', null, t('list.counts', data.counts ?? { sysmac: 0, tia: 0, st: 0 })) : null,
+          h('div', { title: (data?.roots ?? []).join('\n') }, t('list.roots', { n: (data?.roots ?? []).length })),
+          data?.generatedAt ? h('div', null, t('list.generatedAt', { time: formatDate(data.generatedAt) })) : null,
+          data?.truncated ? h('div', null, t('list.truncated')) : null,
+        ),
+      )
+    }
+
+    function EmptyDetail({ roots, t }) {
+      return h(
+        'div',
+        { className: 'ap-empty-wrap' },
+        h(
+          'div',
+          { className: 'ap-empty' },
+          h('span', { className: 'ap-empty-icon' }, h(PanelIcon, { size: 26 })),
+          h('div', { className: 'ap-empty-title' }, t('detail.emptyTitle')),
+          h('div', { className: 'ap-empty-body' }, t('detail.emptyBody')),
+          roots && roots.length > 0
+            ? h(
+                'div',
+                { className: 'ap-section' },
+                h('div', { className: 'ap-section-title' }, t('list.roots', { n: roots.length })),
+                h(
+                  'div',
+                  { className: 'ap-chips' },
+                  roots.map((root) => h('span', { className: 'ap-chip', key: root }, root)),
+                ),
+                h('div', { className: 'ap-hint' }, t('detail.rootsConfig')),
+              )
+            : null,
+          h('div', { className: 'ap-hint' }, t('detail.emptyHint')),
+        ),
+      )
+    }
+
+    function CopyButton({ text, label, t }) {
+      const [status, setStatus] = React.useState('idle')
+      const [nonce, setNonce] = React.useState(0)
+      React.useEffect(() => {
+        if (nonce === 0) return undefined
+        const timer = setTimeout(() => setStatus('idle'), 2200)
+        return () => clearTimeout(timer)
+      }, [nonce])
+      return h(
+        'button',
+        {
+          type: 'button',
+          className: 'ap-btn',
+          title: text,
+          onClick: async () => {
+            try {
+              await navigator.clipboard.writeText(text)
+              setStatus('copied')
+            } catch {
+              setStatus('failed')
+            }
+            setNonce((value) => value + 1)
+          },
+        },
+        h('span', { 'aria-live': 'polite' }, status === 'copied' ? t('copied') : status === 'failed' ? t('copyFailed') : label ?? t('copy')),
+      )
+    }
+
+    function DownloadButton({ url, fileName, label, t, className }) {
+      const [state, setState] = React.useState({ busy: false, error: null })
+      return h(
+        'div',
+        { className: 'ap-download' },
+        h(
+          'button',
+          {
+            type: 'button',
+            className: className ?? 'ap-btn',
+            disabled: state.busy,
+            onClick: async () => {
+              setState({ busy: true, error: null })
+              try {
+                await downloadFile(url, fileName)
+                setState({ busy: false, error: null })
+              } catch (error) {
+                setState({ busy: false, error: error?.message ?? String(error) })
+              }
+            },
+          },
+          state.busy ? t('st.converting') : label,
+        ),
+        state.error ? h('div', { className: 'ap-error' }, t('download.failed', { error: state.error })) : null,
+      )
+    }
+
+    function MetaGrid({ cells }) {
+      return h(
+        'div',
+        { className: 'ap-grid' },
+        cells.filter(Boolean).map((cell, index) =>
+          h(
+            'div',
+            { className: 'ap-cell', key: `${cell.label}-${index}` },
+            h('span', { className: 'ap-cell-label' }, cell.label),
+            h('span', { className: 'ap-cell-value', title: typeof cell.value === 'string' ? cell.value : undefined }, cell.value ?? '—'),
+          ),
+        ),
+      )
+    }
+
+    function VariableTable({ rows, t }) {
+      if (rows.length === 0) return h('div', { className: 'ap-hint' }, t('variables.empty'))
+      return h(
+        'div',
+        { className: 'ap-table-wrap' },
+        h(
+          'table',
+          { className: 'ap-table' },
+          h(
+            'thead',
+            null,
+            h(
+              'tr',
+              null,
+              h('th', null, t('variables.name')),
+              h('th', null, t('variables.type')),
+              h('th', null, t('variables.address')),
+              h('th', null, t('variables.scope')),
+            ),
+          ),
+          h(
+            'tbody',
+            null,
+            rows.map((variable, index) =>
+              h(
+                'tr',
+                { key: `${variable.table ?? ''}|${variable.name}|${variable.address ?? ''}|${index}` },
+                h('td', { title: variable.comment || undefined }, variable.name),
+                h('td', { className: 'mono' }, variable.dataType || '—'),
+                h('td', { className: 'mono' }, variable.address || '—'),
+                h('td', null, variable.scope || '—'),
+              ),
+            ),
+          ),
+        ),
+      )
+    }
+
+    function SectionView({ section, t }) {
+      const isSt = section.language === 'ST' && typeof section.stText === 'string'
+      const rungs = Array.isArray(section.rungs) ? section.rungs : []
+      return h(
+        'div',
+        { className: 'ap-section' },
+        h(
+          'div',
+          { className: 'ap-section-head' },
+          h('span', { className: 'ap-section-title' }, `${section.name} · ${section.language}`),
+          h(
+            'span',
+            { className: 'ap-pou-meta' },
+            section.language === 'ST'
+              ? t('programs.lines', { n: section.stLines })
+              : t('programs.rungs', { n: section.rungCount }),
+          ),
+        ),
+        isSt
+          ? h(
+              React.Fragment,
+              null,
+              h('pre', { className: 'ap-code' }, section.stText),
+              section.stTextTruncated ? h('div', { className: 'ap-note' }, t('st.sourceTruncated', { n: 200000 })) : null,
+            )
+          : rungs.length > 0
+            ? h(
+                React.Fragment,
+                null,
+                h(
+                  'div',
+                  { className: 'ap-rungs' },
+                  rungs.map((rung, index) =>
+                    h(
+                      'div',
+                      { className: 'ap-rung', key: index },
+                      h('span', { className: 'ap-rung-index' }, `R${index + 1}`),
+                      h(
+                        'div',
+                        { className: 'ap-rung-body' },
+                        h('span', null, rung.comment ? `${rung.text}   // ${rung.comment}` : rung.text),
+                        rung.stText
+                          ? h(
+                              'details',
+                              { className: 'ap-rung-st' },
+                              h('summary', null, 'ST'),
+                              h('pre', { className: 'ap-code' }, rung.stText),
+                            )
+                          : null,
+                      ),
+                    ),
+                  ),
+                ),
+                section.rungsTruncated
+                  ? h('div', { className: 'ap-note' }, t('programs.truncated', { shown: rungs.length, total: section.rungCount }))
+                  : null,
+              )
+            : h('div', { className: 'ap-hint' }, t('programs.noRungs')),
+      )
+    }
+
+    function PouViewer({ projectPath, pou, t }) {
+      const [body, setBody] = React.useState({ loading: false, data: null, error: null })
+      React.useEffect(() => {
+        if (!pou) return undefined
+        const controller = new AbortController()
+        setBody({ loading: true, data: null, error: null })
+        const url = `/agentplc/api/pou?path=${encodeURIComponent(projectPath)}&name=${encodeURIComponent(pou.name)}`
+        getJson(url, controller.signal)
+          .then((data) => setBody({ loading: false, data: data.pou, error: null }))
+          .catch((error) => {
+            if (error?.name === 'AbortError') return
+            setBody({ loading: false, data: null, error: error.message })
+          })
+        return () => controller.abort()
+      }, [projectPath, pou?.name])
+      if (body.loading) return h('div', { className: 'ap-spinner' }, t('loading'))
+      if (body.error) return h('div', { className: 'ap-error' }, t('error.prefix', { error: body.error }))
+      if (!body.data) return null
+      return h(
+        'div',
+        { className: 'ap-section' },
+        (body.data.sections ?? []).map((section) => h(SectionView, { key: section.bodyGuid ?? section.name, section, t })),
+      )
+    }
+
+    function VerifyPanel({ projectPath, t }) {
+      const [state, setState] = React.useState({ loading: false, data: null, error: null })
+      const run = async () => {
+        setState({ loading: true, data: null, error: null })
+        try {
+          const response = await fetch(`/agentplc/api/sysmac/verify?path=${encodeURIComponent(projectPath)}`, {
+            credentials: 'same-origin',
+            headers: { accept: 'application/json' },
+          })
+          const text = await response.text()
+          let payload
+          try {
+            payload = JSON.parse(text)
+          } catch {
+            payload = { ok: false, error: text.slice(0, 160) || `HTTP ${response.status}` }
+          }
+          if (!response.ok || !payload.ok) setState({ loading: false, data: null, error: payload.error ?? `HTTP ${response.status}` })
+          else setState({ loading: false, data: payload.result, error: null })
+        } catch (error) {
+          setState({ loading: false, data: null, error: error?.message ?? String(error) })
+        }
+      }
+      const data = state.data
+      return h(
+        'div',
+        { className: 'ap-section' },
+        h(
+          'div',
+          { className: 'ap-section-head' },
+          h('span', { className: 'ap-section-title' }, t('verify.title')),
+          h(
+            'button',
+            { type: 'button', className: 'ap-btn', onClick: run, disabled: state.loading },
+            state.loading ? t('verify.running') : t('verify.run'),
+          ),
+        ),
+        state.error ? h('div', { className: 'ap-error' }, t('error.prefix', { error: state.error })) : null,
+        data
+          ? h(
+              React.Fragment,
+              null,
+              h(
+                'div',
+                { className: 'ap-hint' },
+                data.errors === 0 && data.warnings === 0
+                  ? t('verify.clean')
+                  : t('verify.summary', { errors: data.errors, warnings: data.warnings }),
+              ),
+              data.issues.length > 0
+                ? h(
+                    'div',
+                    { className: 'ap-issues' },
+                    data.issues
+                      .slice(0, 60)
+                      .map((issue, index) =>
+                        h(
+                          'div',
+                          { className: `ap-issue ${issue.severity}`, key: `${index}-${issue.code}` },
+                          `${issue.pou ? `${issue.pou} · ` : ''}${issue.message}`,
+                        ),
+                      ),
+                  )
+                : null,
+              data.issues.length > 60 ? h('div', { className: 'ap-hint' }, t('verify.more', { n: data.issues.length - 60 })) : null,
+            )
+          : null,
+      )
+    }
+
+    function SysmacDetail({ project, t }) {
+      const [tab, setTab] = React.useState('overview')
+      const [query, setQuery] = React.useState('')
+      const [selectedPou, setSelectedPou] = React.useState(null)
+      const variables = project.variableSample ?? []
+      const filtered = React.useMemo(() => {
+        if (!query) return variables
+        const needle = query.toLowerCase()
+        return variables.filter((variable) =>
+          [variable.name, variable.dataType, variable.address, variable.comment].join(' ').toLowerCase().includes(needle),
+        )
+      }, [variables, query])
+      const pouRows = project.pous ?? []
+      return h(
+        React.Fragment,
+        null,
+        h(
+          'div',
+          { className: 'ap-actions' },
+          h(DownloadButton, {
+            url: `/agentplc/api/variables.csv?path=${encodeURIComponent(project.path)}`,
+            fileName: `${project.name}-variables.csv`,
+            label: t('variables.download'),
+            t,
+          }),
+          h(CopyButton, {
+            text: t('copy.sysmac', { path: project.path }),
+            label: t('copy'),
+            t,
+          }),
+        ),
+        h(VerifyPanel, { projectPath: project.path, t }),
+        h(MetaGrid, {
+          cells: [
+            { label: t('meta.controller'), value: project.cpu ? `${project.cpu.model}${project.cpu.firmware ? ` / ${project.cpu.firmware}` : ''}` : t('meta.unknown') },
+            { label: t('meta.pous'), value: String(pouRows.length) },
+            { label: t('meta.variables'), value: String(project.variableCount ?? 0) },
+            { label: t('meta.tables'), value: String((project.tables ?? []).length) },
+            { label: t('meta.tasks'), value: (project.tasks ?? []).map((task) => task.name).join(', ') || '—' },
+            { label: t('meta.size'), value: formatBytes(project.sizeBytes) },
+            { label: t('meta.modified'), value: formatDate(project.modifiedAt) },
+          ],
+        }),
+        h(
+          'div',
+          { className: 'ap-tabs', role: 'tablist' },
+          ['overview', 'variables', 'programs'].map((key) =>
+            h(
+              'button',
+              {
+                key,
+                type: 'button',
+                role: 'tab',
+                'aria-selected': tab === key,
+                className: `ap-tab${tab === key ? ' active' : ''}`,
+                onClick: () => setTab(key),
+              },
+              key === 'variables' ? `${t('tab.variables')} ${project.variableCount ?? ''}`.trim() : key === 'programs' ? `${t('tab.programs')} ${pouRows.length}`.trim() : t('tab.overview'),
+            ),
+          ),
+        ),
+        tab === 'overview'
+          ? h(
+              React.Fragment,
+              null,
+              h(
+                'div',
+                { className: 'ap-section' },
+                h('div', { className: 'ap-section-title' }, t('overview.tasks')),
+                h(
+                  'div',
+                  { className: 'ap-chips' },
+                  (project.tasks ?? []).length === 0
+                    ? h('span', { className: 'ap-hint' }, t('programs.noTasks'))
+                    : project.tasks.map((task) => h('span', { className: 'ap-chip', key: task.name }, `${task.name} · ${task.type}`)),
+                ),
+              ),
+              h(
+                'div',
+                { className: 'ap-section' },
+                h('div', { className: 'ap-section-title' }, t('overview.tables')),
+                h(
+                  'div',
+                  { className: 'ap-chips' },
+                  (project.tables ?? []).length === 0
+                    ? h('span', { className: 'ap-hint' }, t('programs.noTables'))
+                    : project.tables.map((table) => h('span', { className: 'ap-chip', key: table.entry }, `${table.name} · ${table.count}`)),
+                ),
+              ),
+              h(
+                'div',
+                { className: 'ap-section' },
+                h('div', { className: 'ap-section-title' }, t('overview.notes')),
+                (project.notes ?? []).length === 0
+                  ? h('div', { className: 'ap-hint' }, t('overview.noNotes'))
+                  : project.notes.map((note, index) => h('div', { className: 'ap-note', key: index }, note)),
+              ),
+            )
+          : null,
+        tab === 'variables'
+          ? h(
+              React.Fragment,
+              null,
+              h('input', {
+                className: 'ap-search',
+                value: query,
+                placeholder: t('variables.search'),
+                'aria-label': t('variables.search'),
+                onChange: (event) => setQuery(event.target.value),
+              }),
+              h(
+                'div',
+                { className: 'ap-hint' },
+                t('variables.sampleNote', {
+                  total: project.variableCount ?? 0,
+                  sample: project.variableSampleSize ?? filtered.length,
+                  shown: Math.min(filtered.length, 300),
+                }),
+              ),
+              h(VariableTable, { rows: filtered.slice(0, 300), t }),
+            )
+          : null,
+        tab === 'programs'
+          ? h(
+              React.Fragment,
+              null,
+              pouRows.length === 0
+                ? h('div', { className: 'ap-hint' }, t('programs.empty'))
+                : h(
+                    'div',
+                    { className: 'ap-pou-list' },
+                    pouRows.map((pou) =>
+                      h(
+                        'button',
+                        {
+                          key: pou.name,
+                          type: 'button',
+                          className: `ap-pou${selectedPou?.name === pou.name ? ' active' : ''}`,
+                          onClick: () => setSelectedPou(pou),
+                          'aria-pressed': selectedPou?.name === pou.name,
+                        },
+                        h('span', { className: 'ap-pou-name' }, `${pou.name} · ${pou.type}`),
+                        h(
+                          'span',
+                          { className: 'ap-pou-meta' },
+                          [
+                            pou.language === 'Mixed' ? t('programs.mixed') : pou.language === 'ST' ? t('programs.st') : t('programs.ladder'),
+                            (pou.sectionCount ?? 1) > 1
+                              ? t('programs.sections', { n: pou.sectionCount })
+                              : pou.language === 'ST'
+                                ? t('programs.lines', { n: pou.stLines })
+                                : t('programs.rungs', { n: pou.rungCount }),
+                          ].join(' · '),
+                        ),
+                      ),
+                    ),
+                  ),
+              selectedPou ? h(PouViewer, { projectPath: project.path, pou: selectedPou, t }) : h('div', { className: 'ap-hint' }, t('programs.hint')),
+            )
+          : null,
+      )
+    }
+
+    function StDetail({ project, t }) {
+      const [source, setSource] = React.useState({ loading: true, text: '', error: null })
+      React.useEffect(() => {
+        const controller = new AbortController()
+        setSource({ loading: true, text: '', error: null })
+        getJson(`/agentplc/api/st-source?path=${encodeURIComponent(project.path)}`, controller.signal)
+          .then((data) => setSource({ loading: false, text: data.source ?? '', error: null }))
+          .catch((error) => {
+            if (error?.name === 'AbortError') return
+            setSource({ loading: false, text: '', error: error.message })
+          })
+        return () => controller.abort()
+      }, [project.path])
+      return h(
+        React.Fragment,
+        null,
+        h(
+          'div',
+          { className: 'ap-actions' },
+          h(DownloadButton, {
+            url: `/agentplc/api/st-xml?path=${encodeURIComponent(project.path)}`,
+            fileName: `${project.name}.sysmac.xml`,
+            label: t('st.download'),
+            className: 'ap-btn primary',
+            t,
+          }),
+          h(DownloadButton, {
+            url: `/agentplc/api/st-xml?path=${encodeURIComponent(project.path)}&format=plcopen`,
+            fileName: `${project.name}.plcopen.xml`,
+            label: t('st.downloadPlcopen'),
+            t,
+          }),
+        ),
+        h('div', { className: 'ap-hint' }, t('st.formatHint')),
+        h(MetaGrid, {
+          cells: [
+            { label: t('meta.size'), value: formatBytes(project.sizeBytes) },
+            { label: t('meta.lines'), value: t('programs.lines', { n: project.lines ?? 0 }) },
+            { label: t('meta.modified'), value: formatDate(project.modifiedAt) },
+            { label: t('st.blocksLabel'), value: String((project.blocks ?? []).length) },
+          ],
+        }),
+        h('div', { className: 'ap-hint' }, t('st.hint')),
+        (project.blocks ?? []).length > 0
+          ? h(
+              'div',
+              { className: 'ap-chips' },
+              project.blocks.map((block) => h('span', { className: 'ap-chip', key: `${block.type}-${block.name}` }, `${block.type} ${block.name}`)),
+            )
+          : null,
+        source.loading
+          ? h('div', { className: 'ap-spinner' }, t('loading'))
+          : source.error
+            ? h('div', { className: 'ap-error' }, t('error.prefix', { error: source.error }))
+            : h(
+                React.Fragment,
+                null,
+                project.sourceTruncated ? h('div', { className: 'ap-note' }, t('st.sourceTruncated', { n: 12000 })) : null,
+                h('pre', { className: 'ap-code' }, source.text),
+              ),
+      )
+    }
+
+    function TiaDetail({ project, t }) {
+      const [state, setState] = React.useState({ loading: false, data: null, error: null })
+      const readDevices = async () => {
+        setState({ loading: true, data: null, error: null })
+        try {
+          const response = await fetch(`/agentplc/api/tia/list?path=${encodeURIComponent(project.path)}`, {
+            credentials: 'same-origin',
+            headers: { accept: 'application/json' },
+          })
+          const text = await response.text()
+          let data
+          try {
+            data = JSON.parse(text)
+          } catch {
+            data = { ok: false, error: text.slice(0, 160) || `HTTP ${response.status}` }
+          }
+          if (!response.ok || !data.ok) setState({ loading: false, data: null, error: data.error ?? `HTTP ${response.status}` })
+          else setState({ loading: false, data: data.data, error: null })
+        } catch (error) {
+          setState({ loading: false, data: null, error: error?.message ?? String(error) })
+        }
+      }
+      const devices = state.data?.devices ?? []
+      return h(
+        React.Fragment,
+        null,
+        h(MetaGrid, {
+          cells: [
+            { label: t('meta.type'), value: project.version ?? 'TIA' },
+            { label: t('meta.size'), value: formatBytes(project.sizeBytes) },
+            { label: t('meta.modified'), value: formatDate(project.modifiedAt) },
+          ],
+        }),
+        h('div', { className: 'ap-note' }, t('tia.noteLocal')),
+        h(
+          'div',
+          { className: 'ap-actions' },
+          h(
+            'button',
+            { type: 'button', className: 'ap-btn primary', onClick: readDevices, disabled: state.loading },
+            state.loading ? t('tia.reading') : t('tia.readDevices'),
+          ),
+          h(CopyButton, {
+            text: t('copy.tia', { path: project.path }),
+            label: t('tia.plan'),
+            t,
+          }),
+        ),
+        state.error ? h('div', { className: 'ap-error' }, t('error.prefix', { error: state.error })) : null,
+        devices.map((device) => {
+          const plc = device.plc
+          return h(
+            'div',
+            { className: 'ap-section', key: device.name },
+            h(
+              'div',
+              { className: 'ap-section-head' },
+              h('span', { className: 'ap-section-title' }, `${t('tia.device')} · ${device.name}`),
+              h('span', { className: 'ap-pou-meta' }, device.type ?? ''),
+            ),
+            plc
+              ? h(
+                  React.Fragment,
+                  null,
+                  h(
+                    'div',
+                    { className: 'ap-hint' },
+                    `${plc.name} · ${t('tia.blocks')} ${plc.blocks?.length ?? 0}${(plc.types ?? []).length > 0 ? ` · ${t('tia.types')} ${plc.types.length}` : ''}`,
+                  ),
+                  h(
+                    'div',
+                    { className: 'ap-chips' },
+                    (plc.blocks ?? []).map((block) => h('span', { className: 'ap-chip', key: block.name }, block.name)),
+                  ),
+                  (plc.types ?? []).length > 0
+                    ? h(
+                        'div',
+                        { className: 'ap-chips' },
+                        plc.types.map((name) => h('span', { className: 'ap-chip', key: name }, name)),
+                      )
+                    : null,
+                )
+              : h('div', { className: 'ap-hint' }, '—'),
+          )
+        }),
+        h('div', { className: 'ap-hint' }, t('tia.openHint')),
+      )
+    }
+
+    function ProjectDetail({ detail, t }) {
+      return h(
+        'section',
+        { className: 'ap-detail' },
+        h(
+          'div',
+          { className: 'ap-detail-head' },
+          h(
+            'div',
+            { className: 'ap-detail-title' },
+            h('span', { className: `ap-tag ${detail.kind}` }, KIND_LABEL[detail.kind] ?? detail.kind),
+            h('span', { className: 'ap-detail-name' }, detail.name),
+          ),
+          h('div', { className: 'ap-path' }, detail.path),
+        ),
+        detail.kind === 'sysmac' ? h(SysmacDetail, { key: detail.path, project: detail, t }) : null,
+        detail.kind === 'st' ? h(StDetail, { key: detail.path, project: detail, t }) : null,
+        detail.kind === 'tia' ? h(TiaDetail, { key: detail.path, project: detail, t }) : null,
+      )
+    }
+
+    function CreateDialog({ t, projects, onClose, onCreated }) {
+      const templates = (projects ?? []).filter((project) => project.kind === 'sysmac')
+      const [template, setTemplate] = React.useState(templates[0]?.path ?? '')
+      const [projectName, setProjectName] = React.useState('AgentPLC_新建工程')
+      const [output, setOutput] = React.useState('')
+      const [variablesMode, setVariablesMode] = React.useState('keep')
+      const [pouName, setPouName] = React.useState('')
+      const [pouBody, setPouBody] = React.useState('IF P_First_Run THEN\n    RETURN;\nEND_IF;')
+      const [compile, setCompile] = React.useState(false)
+      const [status, setStatus] = React.useState({ running: false, error: null, ok: null })
+
+      const close = () => {
+        if (!status.running) onClose()
+      }
+      const submit = async () => {
+        if (!template) {
+          setStatus({ running: false, error: 'template missing', ok: null })
+          return
+        }
+        setStatus({ running: true, error: null, ok: null })
+        const params = new URLSearchParams({ template, projectName, variablesMode, compile: String(compile) })
+        if (output.trim()) params.set('output', output.trim())
+        if (pouName.trim()) {
+          params.set('newPous', JSON.stringify([{ name: pouName.trim(), stText: pouBody }]))
+          params.set('variablesMode', variablesMode)
+        }
+        try {
+          const response = await fetch(`/agentplc/api/create?${params.toString()}`, {
+            credentials: 'same-origin',
+            headers: { accept: 'application/json' },
+          })
+          const payload = await response.json()
+          if (!response.ok || !payload.ok) {
+            setStatus({ running: false, error: payload.error ?? `HTTP ${response.status}`, ok: null })
+            return
+          }
+          setStatus({ running: false, error: null, ok: payload.path })
+          onCreated(payload.path)
+        } catch (error) {
+          setStatus({ running: false, error: error?.message ?? String(error), ok: null })
+        }
+      }
+
+      return h(
+        'div',
+        {
+          className: 'ap-modal',
+          onMouseDown: (event) => {
+            if (event.target === event.currentTarget) close()
+          },
+        },
+        h(
+          'div',
+          { className: 'ap-modal-card' },
+          h(
+            'div',
+            { className: 'ap-modal-head' },
+            h('span', null, t('create.title')),
+            h('button', { type: 'button', className: 'ap-icon-btn', onClick: close, 'aria-label': t('create.cancel') }, '×'),
+          ),
+          h(
+            'label',
+            { className: 'ap-field' },
+            t('create.template'),
+            h(
+              'select',
+              { value: template, onChange: (event) => setTemplate(event.target.value) },
+              templates.map((project) => h('option', { key: project.path, value: project.path }, `${project.name} — ${project.path}`)),
+            ),
+          ),
+          h('label', { className: 'ap-field' }, t('create.name'), h('input', { value: projectName, onChange: (event) => setProjectName(event.target.value) })),
+          h(
+            'label',
+            { className: 'ap-field' },
+            t('create.output'),
+            h('input', { value: output, placeholder: t('create.outputHint'), onChange: (event) => setOutput(event.target.value) }),
+          ),
+          h(
+            'label',
+            { className: 'ap-field' },
+            t('create.variablesMode'),
+            h(
+              'select',
+              { value: variablesMode, onChange: (event) => setVariablesMode(event.target.value) },
+              [
+                ['replace', t('create.modeReplace')],
+                ['merge', t('create.modeMerge')],
+                ['keep', t('create.modeKeep')],
+              ].map(([value, label]) => h('option', { key: value, value }, label)),
+            ),
+          ),
+          h('label', { className: 'ap-field' }, t('create.pouName'), h('input', { value: pouName, onChange: (event) => setPouName(event.target.value) })),
+          h('label', { className: 'ap-field' }, t('create.pouBody'), h('textarea', { value: pouBody, onChange: (event) => setPouBody(event.target.value) })),
+          h(
+            'label',
+            { className: 'ap-check' },
+            h('input', { type: 'checkbox', checked: compile, onChange: (event) => setCompile(event.target.checked) }),
+            t('create.compile'),
+          ),
+          status.error ? h('div', { className: 'ap-error' }, t('create.error', { error: status.error })) : null,
+          status.ok ? h('div', { className: 'ap-hint' }, t('create.success', { path: status.ok })) : null,
+          h(
+            'div',
+            { className: 'ap-modal-actions' },
+            h('button', { type: 'button', className: 'ap-btn', onClick: close, disabled: status.running }, t('create.cancel')),
+            h(
+              'button',
+              { type: 'button', className: 'ap-btn primary', onClick: submit, disabled: status.running || !template },
+              status.running ? t('create.running') : t('create.submit'),
+            ),
+          ),
+        ),
+      )
+    }
+
+    function Panel({ ctx }) {
+      const t = useTranslate(ctx)
+      // The locale service may load after this plugin; register the dictionaries on first paint too.
+      React.useEffect(() => registerLocaleDictionary(ctx), [ctx])
+      const [state, setState] = React.useState({ loading: true, data: null, error: null })
+      const [query, setQuery] = React.useState('')
+      const [selectedPath, setSelectedPath] = React.useState(null)
+      const [detail, setDetail] = React.useState({ loading: false, data: null, error: null })
+      const [refreshToken, setRefreshToken] = React.useState(0)
+      const [detailToken, setDetailToken] = React.useState(0)
+      const [createOpen, setCreateOpen] = React.useState(false)
+
+      React.useEffect(() => {
+        const controller = new AbortController()
+        let timedOut = false
+        const timer = setTimeout(() => {
+          timedOut = true
+          controller.abort()
+        }, 45000)
+        setState((current) => ({ ...current, loading: true, error: null }))
+        getJson(`/agentplc/api/state${refreshToken > 0 ? '?refresh=1' : ''}`, controller.signal)
+          .then((data) => setState({ loading: false, data, error: null }))
+          .catch((error) => {
+            if (error?.name === 'AbortError' && !timedOut) return
+            setState((current) => ({ loading: false, data: current.data, error: timedOut ? 'timeout' : error?.message ?? String(error) }))
+          })
+          .finally(() => clearTimeout(timer))
+        return () => {
+          clearTimeout(timer)
+          controller.abort()
+        }
+      }, [refreshToken])
+
+      React.useEffect(() => {
+        if (!selectedPath) {
+          setDetail({ loading: false, data: null, error: null })
+          return undefined
+        }
+        const controller = new AbortController()
+        let timedOut = false
+        const timer = setTimeout(() => {
+          timedOut = true
+          controller.abort()
+        }, 45000)
+        setDetail({ loading: true, data: null, error: null })
+        getJson(`/agentplc/api/project?path=${encodeURIComponent(selectedPath)}`, controller.signal)
+          .then((data) => setDetail({ loading: false, data: data.project, error: null }))
+          .catch((error) => {
+            if (error?.name === 'AbortError' && !timedOut) return
+            setDetail({ loading: false, data: null, error: timedOut ? 'timeout' : error?.message ?? String(error) })
+          })
+          .finally(() => clearTimeout(timer))
+        return () => {
+          clearTimeout(timer)
+          controller.abort()
+        }
+      }, [selectedPath, detailToken])
+
+      const handleSelect = React.useCallback(
+        (change) => {
+          if (change.query !== undefined) setQuery(change.query)
+          if (change.path === undefined) return
+          if (change.path === selectedPath) setDetailToken((value) => value + 1)
+          else setSelectedPath(change.path)
+        },
+        [selectedPath],
+      )
+
+      const selected = (state.data?.projects ?? []).find((project) => project.path === selectedPath)
+      const status = !state.data && state.loading ? 'checking' : state.error ? 'error' : state.loading ? 'loading' : 'ready'
+      return h(
+        'div',
+        { className: 'ap-root' },
+        h('style', { dangerouslySetInnerHTML: { __html: CSS } }),
+        createOpen
+          ? h(CreateDialog, {
+              t,
+              projects: state.data?.projects,
+              onClose: () => setCreateOpen(false),
+              onCreated: (path) => {
+                setCreateOpen(false)
+                setRefreshToken((value) => value + 1)
+                if (path) setSelectedPath(path)
+              },
+            })
+          : null,
+        h(
+          'header',
+          { className: 'ap-top' },
+          h(
+            'div',
+            { className: 'ap-brand' },
+            h('span', { className: 'ap-brand-mark' }, h(PanelIcon, { size: 22 })),
+            h(
+              'div',
+              { className: 'ap-title' },
+              h('span', { className: 'ap-title-main' }, t('title')),
+              h('span', { className: 'ap-title-sub' }, t('subtitle')),
+            ),
+          ),
+          h(
+            'div',
+            { className: 'ap-header-actions' },
+            h('button', { type: 'button', className: 'ap-btn primary', onClick: () => setCreateOpen(true) }, t('create.title')),
+            h(StatusPill, { status, t }),
+            h(
+              'button',
+              {
+                type: 'button',
+                className: 'ap-icon-btn',
+                title: t('refresh'),
+                'aria-label': t('refresh'),
+                onClick: () => {
+                  setRefreshToken((value) => value + 1)
+                  if (selectedPath) setDetailToken((value) => value + 1)
+                },
+              },
+              RefreshIcon(),
+            ),
+          ),
+        ),
+        state.error ? h('div', { className: 'ap-error ap-error-bar' }, t('error.prefix', { error: state.error })) : null,
+        h(ToolchainCards, { data: state.data, t }),
+        h(
+          'div',
+          { className: 'ap-body' },
+          h(ProjectList, { data: state.data, query, selectedPath, onSelect: handleSelect, t }),
+          detail.loading
+            ? h(
+                'section',
+                { className: 'ap-detail' },
+                h('div', { className: 'ap-skeleton line', style: { width: '42%' } }),
+                h('div', { className: 'ap-skeleton line', style: { width: '68%' } }),
+                h('div', { className: 'ap-skeleton', style: { height: 96 } }),
+                h('div', { className: 'ap-skeleton', style: { height: 160 } }),
+              )
+            : detail.error
+              ? h(
+                  'section',
+                  { className: 'ap-detail' },
+                  selected
+                    ? h(
+                        'div',
+                        { className: 'ap-detail-head' },
+                        h(
+                          'div',
+                          { className: 'ap-detail-title' },
+                          h('span', { className: `ap-tag ${selected.kind}` }, KIND_LABEL[selected.kind] ?? selected.kind),
+                          h('span', { className: 'ap-detail-name' }, selected.name),
+                        ),
+                        h('div', { className: 'ap-path' }, selected.path),
+                      )
+                    : null,
+                  h('div', { className: 'ap-error' }, t('error.prefix', { error: detail.error })),
+                  h('div', { className: 'ap-actions' }, h('button', { type: 'button', className: 'ap-btn', onClick: () => setDetailToken((value) => value + 1) }, t('retry'))),
+                )
+              : detail.data
+                ? h(ProjectDetail, { detail: detail.data, t })
+                : h('section', { className: 'ap-detail' }, h(EmptyDetail, { roots: state.data?.roots, t })),
+        ),
+      )
+    }
+
+    function RefreshIcon() {
+      return h(
+        'svg',
+        { width: 15, height: 15, viewBox: '0 0 24 24', 'aria-hidden': true, style: { display: 'block' } },
+        h('path', { d: 'M20 12a8 8 0 1 1-2.34-5.66', fill: 'none', stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round' }),
+        h('path', { d: 'M20 4v5h-5', fill: 'none', stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round' }),
+      )
+    }
+
+    function PanelIcon({ size = 18, active = false }) {
+      const stroke = 'currentColor'
+      return h(
+        'svg',
+        {
+          width: size,
+          height: size,
+          viewBox: '0 0 36 36',
+          'aria-hidden': true,
+          style: { display: 'block', opacity: active ? 1 : 0.9 },
+        },
+        h('rect', { x: 4.5, y: 7.5, width: 27, height: 21, rx: 3.5, fill: 'none', stroke, strokeWidth: 2.2 }),
+        h('path', { d: 'M10.5 7.5V3.2M17.5 7.5V3.2M24.5 7.5V3.2', stroke, strokeWidth: 1.9, strokeLinecap: 'round' }),
+        h('path', { d: 'M10.5 28.5v4.3M17.5 28.5v4.3M24.5 28.5v4.3', stroke, strokeWidth: 1.9, strokeLinecap: 'round' }),
+        h('path', { d: 'M12.2 12.5v11M21.4 12.5v11', stroke, strokeWidth: 1.7, strokeLinecap: 'round' }),
+        h('path', { d: 'M12.2 18h3.4', stroke, strokeWidth: 1.7, strokeLinecap: 'round' }),
+        h('circle', { cx: 23, cy: 18, r: 2.9, fill: 'none', stroke, strokeWidth: 1.7 }),
+        h('path', { d: 'M25.9 18h4.6', stroke, strokeWidth: 1.7, strokeLinecap: 'round' }),
+      )
+    }
+
+    function apply(ctx) {
+      registerLocaleDictionary(ctx)
+      const t = createTranslate(ctx)
+      ctx.slots.inject('sidebar.panellist', () =>
+        ctx.slots.register(
+          {
+            name: 'sidebar.panellist',
+            id: 'agentplc',
+            order: 20,
+            label: () => t('nav.label'),
+          },
+          PanelIcon,
+        ),
+      )
+      ctx.slots.inject('main', () =>
+        ctx.slots.register(
+          {
+            name: 'main',
+            key: 'agentplc',
+          },
+          (props) => h(Panel, { ...props, ctx }),
+        ),
+      )
+    }
+
+    return { inject: ['slots'], apply }
+  },
+})
