@@ -16,7 +16,8 @@
     "structured-text"
   ],
   "scripts": {
-    "check": "node scripts/check-tool-schemas.mjs"
+    "check": "node scripts/check-tool-schemas.mjs",
+    "smoke": "node scripts/smoke-test.mjs"
   },
   "exports": {
     ".": "./index.js",

@@ -256,3 +256,15 @@ npm pack
 - **列表是 0 个工程**：检查 `projectRoots` 是否指向真实目录，或清空让它扫描默认的 Documents/Desktop。
 - **编译一直等**：UAC 弹窗需要确认；不确认会在 2 分钟后超时。
 - **TIA 报 Openness 安全错误**：把当前用户加入 `Siemens TIA Openness` 组并重新登录。
+
+## 开发与发布检查
+
+```powershell
+npm run check                 # 工具 schema 校验
+node scripts/check-client.mjs # 面板语法与字典 key 检查
+node scripts/smoke-test.mjs   # 不需要模板：schema + 面板 + ST 转换 + README 检查
+node scripts/smoke-test.mjs <模板.smc2>  # 额外跑 create → 静态校验 → 新增 POU 全链路
+```
+
+`examples/demo.st` 是冒烟测试用的示例 ST 源文件（TYPE + FUNCTION_BLOCK + PROGRAM）。
+`<模板.smc2>` 必须是真实可读的 Sysmac 工程（冒烟测试不会上传或修改它，只在临时目录生成副本）。
