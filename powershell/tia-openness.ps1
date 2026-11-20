@@ -1,4 +1,4 @@
-<#
+﻿<#
 TIA Portal Openness driver for the DSH AgentPLC plugin.
 
 Reads one JSON command file, performs exactly one engineering action against a
@@ -27,17 +27,22 @@ function Get-CompilerState([object]$CompilerResult) {
 }
 
 function Get-CompilerMessages([object]$CompilerResult) {
-  $messages = @()
-  if ($null -eq $CompilerResult) { return $messages }
-  try {
-    foreach ($message in $CompilerResult.Messages) {
-      $messages += [pscustomobject]@{
-        state = "$($message.State)"
-        path  = "$($message.Path)"
-        text  = "$($message.Text)"
+  $messages = New-Object System.Collections.ArrayList
+  function Collect-CompilerMessages([object]$node) {
+    if ($null -eq $node) { return }
+    try {
+      foreach ($message in $node.Messages) {
+        [void]$messages.Add([pscustomobject]@{
+          state = "$($message.State)"
+          path  = "$($message.Path)"
+          text  = "$($message.Description)"
+          date  = "$($message.DateTime)"
+        })
+        Collect-CompilerMessages $message
       }
-    }
-  } catch { }
+    } catch { }
+  }
+  Collect-CompilerMessages $CompilerResult
   return $messages
 }
 
@@ -142,8 +147,10 @@ function Compile-PlcSoftware([object]$Software) {
   if ($null -eq $compileService) { throw 'The PLC software exposes no ICompilable compile service.' }
   $result = $compileService.Compile()
   return [pscustomobject]@{
-    state    = (Get-CompilerState $result)
-    messages = @(Get-CompilerMessages $result)
+    state        = (Get-CompilerState $result)
+    errorCount   = $result.ErrorCount
+    warningCount = $result.WarningCount
+    messages     = @(Get-CompilerMessages $result)
   }
 }
 
@@ -245,6 +252,8 @@ try {
             project  = "$($project.Name)"
             plc      = "$($software.Name)"
             state    = $compiled.state
+            errorCount   = $compiled.errorCount
+            warningCount = $compiled.warningCount
             messages = $compiled.messages
           }
         })
@@ -288,6 +297,63 @@ try {
           ok     = $true
           action = 'exportBlocks'
           data   = [pscustomobject]@{ project = "$($project.Name)"; plc = "$($software.Name)"; exported = $exported }
+        })
+    }
+    'importBlocks' {
+      $imported = @()
+      foreach ($blockPath in $command.blockPaths) {
+        $file = New-Object System.IO.FileInfo($blockPath)
+        if (-not $file.Exists) { throw "Block XML not found: $blockPath" }
+        $software.BlockGroup.Blocks.Import($file, [Siemens.Engineering.ImportOptions]::None) | Out-Null
+        $imported += $file.Name
+      }
+      $compiled = Compile-PlcSoftware -Software $software
+      Write-Reply ([pscustomobject]@{
+          ok     = $true
+          action = 'importBlocks'
+          data   = [pscustomobject]@{
+            project  = "$($project.Name)"
+            plc      = "$($software.Name)"
+            imported = $imported
+            state    = $compiled.state
+            messages = $compiled.messages
+          }
+        })
+    }
+    'createInstanceDb' {
+      $db = $software.BlockGroup.Blocks.CreateInstanceDB("FB_StarDelta_DB", $true, 124, "FB_StarDelta")
+      $compiled = Compile-PlcSoftware -Software $software
+      Write-Reply ([pscustomobject]@{
+          ok     = $true
+          action = 'createInstanceDb'
+          data   = [pscustomobject]@{
+            project  = "$($project.Name)"
+            plc      = "$($software.Name)"
+            name     = "$($db.Name)"
+            state    = $compiled.state
+            messages = $compiled.messages
+          }
+        })
+    }
+    'compileBlock' {
+      $leaf = ($command.blockPaths[0] -split '/')[-1]
+      $block = Find-BlockAnywhere -Group $software.BlockGroup -Name $leaf
+      if ($null -eq $block) { throw "Block not found: $leaf" }
+      $compileService = Get-EngineeringService -Item $block -ServiceType ([Siemens.Engineering.Compiler.ICompilable])
+      if ($null -eq $compileService) { throw 'The block exposes no ICompilable compile service.' }
+      $compiled = $compileService.Compile()
+      Write-Reply ([pscustomobject]@{
+          ok     = $true
+          action = 'compileBlock'
+          data   = [pscustomobject]@{
+            project      = "$($project.Name)"
+            plc          = "$($software.Name)"
+            block        = "$($block.Name)"
+            state        = (Get-CompilerState $compiled)
+            errorCount   = $compiled.ErrorCount
+            warningCount = $compiled.WarningCount
+            messages     = @(Get-CompilerMessages $compiled)
+          }
         })
     }
     default { throw "Unsupported action: $action" }

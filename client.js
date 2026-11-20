@@ -80,6 +80,12 @@ window.__ModuleLoader__.load({
         'verify.clean': '静态校验通过：未发现未声明变量、重复定义、地址冲突或块不配平。',
         'verify.summary': '{errors} 个错误 · {warnings} 个警告',
         'verify.more': '还有 {n} 条未显示',
+        'roots.add': '添加文件夹',
+        'roots.browse': '浏览…',
+        'roots.remove': '移除该扫描目录',
+        'roots.list': '扫描目录 ({n})',
+        'roots.deleteSelected': '删除选中',
+        'roots.placeholder': '输入或粘贴文件夹路径，如 D:\\Projects',
         'create.title': '新建工程',
         'create.template': '模板工程',
         'create.name': '工程名',
@@ -215,6 +221,12 @@ window.__ModuleLoader__.load({
         'verify.clean': 'No undeclared names, duplicate variables, address conflicts or unbalanced blocks were found.',
         'verify.summary': '{errors} error(s) · {warnings} warning(s)',
         'verify.more': '{n} more not shown',
+        'roots.add': 'Add folder',
+        'roots.browse': 'Browse…',
+        'roots.remove': 'Remove this root',
+        'roots.list': 'Scanned folders ({n})',
+        'roots.deleteSelected': 'Delete selected',
+        'roots.placeholder': 'Type or paste a folder path, e.g. D:\\Projects',
         'create.title': 'New project',
         'create.template': 'Template project',
         'create.name': 'Project name',
@@ -541,7 +553,40 @@ window.__ModuleLoader__.load({
 .ap-field textarea { min-height: 110px; resize: vertical; }
 .ap-modal-actions { display: flex; justify-content: flex-end; gap: 8px; }
 .ap-check { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--dsw-alias-label-secondary); }
-.ap-btn.primary { border-color: color-mix(in srgb, var(--dsw-alias-brand-primary) 55%, transparent); color: var(--dsw-alias-brand-primary); }
+.ap-btn.primary {
+  border-color: color-mix(in srgb, var(--dsw-alias-brand-primary) 55%, transparent);
+  color: var(--dsw-alias-brand-primary);
+}
+.ap-input {
+  height: 28px; width: 220px; padding: 0 8px;
+  border-radius: 6px; font: inherit; font-size: 12px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  background: var(--dsw-alias-bg-base);
+  color: var(--dsw-alias-label-primary);
+}
+.ap-roots { display: flex; flex-wrap: wrap; gap: 6px; padding: 6px 16px 0; }
+.ap-root-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 3px 8px; border-radius: 999px; font-size: 11px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  background: var(--dsw-alias-bg-layer-2);
+  color: var(--dsw-alias-label-secondary);
+  max-width: 46%;
+}
+.ap-root-path { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--ap-mono); }
+.ap-root-del {
+  border: 0; background: transparent; cursor: pointer;
+  color: var(--dsw-alias-label-secondary); font-size: 13px; line-height: 1; padding: 0 2px;
+}
+.ap-roots-panel {
+  display: flex; flex-direction: column; gap: 4px;
+  width: 100%; margin-top: 6px; padding: 8px;
+  border-radius: 8px; border: 1px solid var(--dsw-alias-border-l1);
+  background: var(--dsw-alias-bg-layer-2);
+  max-height: 200px; overflow: auto;
+}
+.ap-root-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--dsw-alias-label-secondary); }
+.ap-roots-actions { display: flex; justify-content: flex-end; margin-top: 4px; }
 
 /* tables */
 .ap-table-wrap { border: 1px solid var(--dsw-alias-border-l1); border-radius: 9px; overflow: auto; max-height: 46vh; }
@@ -1667,6 +1712,10 @@ window.__ModuleLoader__.load({
       const [refreshToken, setRefreshToken] = React.useState(0)
       const [detailToken, setDetailToken] = React.useState(0)
       const [createOpen, setCreateOpen] = React.useState(false)
+      const [rootInput, setRootInput] = React.useState('')
+      const [rootsInfo, setRootsInfo] = React.useState(null)
+      const [rootsOpen, setRootsOpen] = React.useState(false)
+      const [selectedRoots, setSelectedRoots] = React.useState([])
 
       React.useEffect(() => {
         const controller = new AbortController()
@@ -1724,6 +1773,49 @@ window.__ModuleLoader__.load({
         [selectedPath],
       )
 
+      const encodePath64 = (value) => {
+        const bytes = new TextEncoder().encode(value)
+        let binary = ''
+        for (const byte of bytes) binary += String.fromCharCode(byte)
+        return btoa(binary)
+      }
+
+      const folderInputRef = React.useRef(null)
+
+      const handlePickedFolder = async (event) => {
+        const file = event.target.files && event.target.files[0]
+        event.target.value = ''
+        if (!file) return
+        const full = typeof file.path === 'string' ? file.path : ''
+        if (!full) return
+        const value = full.replace(/[\\/][^\\/]*$/, '') || full
+        try {
+          await fetch(`/agentplc/api/roots?action=add&path64=${encodeURIComponent(encodePath64(value))}`, { credentials: 'same-origin' })
+          setRefreshToken((token) => token + 1)
+        } catch {
+          // Keep the typed input as the fallback.
+        }
+      }
+
+      const addRoot = React.useCallback(async () => {
+        const value = rootInput.trim()
+        if (!value) return
+        try {
+          await fetch(`/agentplc/api/roots?action=add&path64=${encodeURIComponent(encodePath64(value))}`, { credentials: 'same-origin' })
+          setRootInput('')
+          setRefreshToken((token) => token + 1)
+        } catch {
+          // Keep the input so the user can retry.
+        }
+      }, [rootInput])
+
+      React.useEffect(() => {
+        fetch('/agentplc/api/roots', { credentials: 'same-origin', headers: { accept: 'application/json' } })
+          .then((response) => response.json())
+          .then((data) => setRootsInfo(data))
+          .catch(() => {})
+      }, [refreshToken])
+
       const selected = (state.data?.projects ?? []).find((project) => project.path === selectedPath)
       const status = !state.data && state.loading ? 'checking' : state.error ? 'error' : state.loading ? 'loading' : 'ready'
       return h(
@@ -1759,6 +1851,34 @@ window.__ModuleLoader__.load({
           h(
             'div',
             { className: 'ap-header-actions' },
+            h('input', {
+              type: 'text',
+              className: 'ap-input',
+              placeholder: t('roots.placeholder'),
+              value: rootInput,
+              onChange: (event) => setRootInput(event.target.value),
+              onKeyDown: (event) => {
+                if (event.key === 'Enter') addRoot()
+              },
+            }),
+            h('button', { type: 'button', className: 'ap-btn', onClick: addRoot }, t('roots.add')),
+            h('input', {
+              type: 'file',
+              multiple: true,
+              webkitdirectory: 'true',
+              style: { display: 'none' },
+              ref: folderInputRef,
+              onChange: handlePickedFolder,
+            }),
+            h(
+              'button',
+              {
+                type: 'button',
+                className: 'ap-btn',
+                onClick: () => folderInputRef.current?.click(),
+              },
+              t('roots.browse'),
+            ),
             h('button', { type: 'button', className: 'ap-btn primary', onClick: () => setCreateOpen(true) }, t('create.title')),
             h(StatusPill, { status, t }),
             h(
@@ -1777,6 +1897,61 @@ window.__ModuleLoader__.load({
             ),
           ),
         ),
+        (rootsInfo?.user ?? []).length > 0
+          ? h(
+              'div',
+              { className: 'ap-roots' },
+              h(
+                'button',
+                { type: 'button', className: 'ap-btn', onClick: () => setRootsOpen((value) => !value) },
+                t('roots.list', { n: (rootsInfo.user ?? []).length }),
+              ),
+              rootsOpen
+                ? h(
+                    'div',
+                    { className: 'ap-roots-panel' },
+                    (rootsInfo.user ?? []).map((root) =>
+                      h(
+                        'label',
+                        { key: root, className: 'ap-root-item' },
+                        h('input', {
+                          type: 'checkbox',
+                          checked: selectedRoots.includes(root),
+                          onChange: (event) =>
+                            setSelectedRoots((current) =>
+                              event.target.checked ? [...current, root] : current.filter((item) => item !== root),
+                            ),
+                        }),
+                        h('span', { className: 'ap-root-path' }, root),
+                      ),
+                    ),
+                    h(
+                      'div',
+                      { className: 'ap-roots-actions' },
+                      h(
+                        'button',
+                        {
+                          type: 'button',
+                          className: 'ap-btn',
+                          disabled: selectedRoots.length === 0,
+                          onClick: async () => {
+                            for (const root of selectedRoots) {
+                              await fetch(`/agentplc/api/roots?action=remove&path64=${encodeURIComponent(encodePath64(root))}`, {
+                                credentials: 'same-origin',
+                              })
+                            }
+                            setSelectedRoots([])
+                            setRootsOpen(false)
+                            setRefreshToken((value) => value + 1)
+                          },
+                        },
+                        t('roots.deleteSelected'),
+                      ),
+                    ),
+                  )
+                : null,
+            )
+          : null,
         state.error ? h('div', { className: 'ap-error ap-error-bar' }, t('error.prefix', { error: state.error })) : null,
         h(ToolchainCards, { data: state.data, t }),
         h(
