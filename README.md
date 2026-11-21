@@ -125,7 +125,7 @@
 生成 `.smc2` 时按下面的模型写，别把 Sysmac 的规则搞反：
 
 1. **全局变量表只放普通数据类型**（`BOOL` / `INT` / `REAL` / `TIME` / 数组 / 结构体等）。`TON`、`TOF`、`CTU` 这类功能块实例**只能放程序内部变量**（`scope: "VAR"`）。
-2. **程序里用到的每个全局变量，都必须在该程序里再声明一次 `VAR_EXTERNAL`**（同名同类型，`scope: "VAR_EXTERNAL"`）。漏了就会报「未定义的标识符」。
+2. **程序里用到的每个全局变量，都必须在该程序里再声明一次 `VAR_EXTERNAL`**（同名同类型，`scope: "VAR_EXTERNAL"`）。漏了就会报「未定义的标识符」。`create` 加 `autoFix: true` 会在写文件前自动补上这些镜像声明（只补声明、不动代码，且只认工程里已存在的全局变量；新 POU 克隆自带的局部变量会去重）。
 3. **只支持 ST 语言**；不自动做 IO 分配（`AT %IX/%QX`）和任务设置，这两项需要在 Sysmac 里手动做。
 4. 生成后带 `compile: true` 跑原厂编译，按返回的错误改；警告一般可忽略。
 5. 需要一个真实 `.smc2` 作模板；仓库里的 `examples/AgentPLC_Demo.smc2` 是脱敏最小模板，可直接用来试（它在插件目录里，`plc_sysmac create` 支持把它当模板；不传 `output` 时会写到「文档」目录）。
@@ -214,6 +214,7 @@
 - **非 ASCII SCL 预警**：`plc_tia plan` 发现源文件代码里（注释和字符串除外）有中文标识符时会先给出警告，避免「返回 Success 但块没生成」；纯中文注释不误报（`FB_StarDelta_EN.scl` 不报，`FB_StarDelta.scl` 报）。
 - **`.ap18` / `.ap16` 真实生成**：`plc_tia run create` 在本机创建 `AgentPlcDemo.ap18`（V18 API，PLC_1 + 导入 `FB_Conveyor.scl`，编译 `Success`，`list` 读回 `Main, FB_Conveyor`）和 `AgentPlcV16.ap16`（V16 API，PLC_1，编译 `Success`）。
 - `plc_tia run importScl` 对已有工程导入 SCL 并编译，返回 `state: Success` 与编译器消息。
+- **autoFix + 真实闭环**：以真实 `真实工程.smc2` 为模板，新程序 `PRG_CommWatch` 使用全局 `CommOk` 但没声明；`create` 加 `autoFix:true` 自动补 `CommOk:BOOL` 的 `VAR_EXTERNAL`，静态校验 `0 error(s)`，原厂编译 `0 error(s), 0 warning(s)`（`PRG_CommWatch` 未挂任务，任务仍归用户）。顺带修了两处：静态校验曾把 `T#1s` 里的 `s` 误报成未声明标识符；`create` 的输出在扫描目录外（如 `%TEMP%`、文档）时编译会被扫描目录规则挡住。
 - **TIA 编译错误可读**：Openness 的块级消息 `Description` 是空的，但递归子消息带真实错误文本和行号；驱动现在把所属块一路传下去，实测坏工程 `BrokenTest.ap16` 返回 `29 error(s)`，摘要形如 `Error: Tag "DB_SD".Main not defined. [OB_SD (OB123) line 3]`，所以 TIA 也能按真实错误改。
 - **TIA 块接口可读**：Openness 对象模型不暴露块接口，所以 `readBlocks` 先把块导出成 Simatic ML，再由 Host 解析 `<Interface><Sections>`；实测 `BrokenTest` 的 `Main`（OB）读出 `Input 2: Initial_Call, Remanence`（含注释），解析器在真实导出上覆盖 FB/FC/OB 的 Input/Output/InOut/Static/Temp/Constant。**不一致（有编译错误）的块 TIA 拒绝导出**，这时会明确返回「先修错误再读」，不会给空接口。
 - **内置示例模板**：`plc_sysmac create` 可直接以 `examples/AgentPLC_Demo.smc2` 为模板（不需要把它加进扫描目录），生成的 `PRG_Example` 挂在 `PrimaryTask`，静态校验 `0 error(s)`；面板「新建工程」的模板下拉里也能选到「内置示例」，不填输出路径时写到「文档」目录。
