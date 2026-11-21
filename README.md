@@ -211,7 +211,11 @@
 - **原厂编译校验**：`plc_sysmac compile` 在提权副本上执行 F7「检查所有程序」+「重编译控制器」（自动确认「所有程序将重新编译，你要继续吗？」→ 是(Y)），从编译窗口读回 `2 error(s), 0 warning(s)` 和两条带 `PRG_Init line 3/4` 的消息；探针实例跑完自动关闭，原工程未改动。
 - `plc_tia plan`（create/list/importScl 等）能按工程后缀选中 V16 或 V18 API 并生成命令文件。
 - **统一 IO 清单**：`真实工程.smc2` 608 个变量 → 6 输入 / 1 输出 / 601 内部（7 个有地址，EtherCAT 输入输出按对象路径分对）；`现场V18工程` 140 个标签 → 84 输入 / 42 输出 / 14 存储，地址全部识别，标签注释从 Openness 的 `MultilingualText` 正确取文本。面板路由 `/agentplc/api/io` 与 `/agentplc/api/io.csv`（UTF-8 BOM + CRLF）实测 200，CSV 51 KB。另在 20 个真实 `.smc2` 工程上抽检 3873 条有地址变量：`%D` 全部归存储，带 `Input`/`Output` 字样的 ECAT / IOBus / BuiltInIO 地址全部归输入/输出，`MC://_MC_AX` 归 IO 区。
-- **TIA SCL 导入的真实坑（已修正结论）**：不是中文标识符，而是**行尾 `//` 注释**——同样的代码带行尾注释时 TIA 报 Success 却整块跳过（`FB_Skip_B`），去掉注释后正常生成并编译；行首 `//`、`(* *)` 块注释、中文标识符都能正常导入（`FB_Cmt_Line`、`FB_Cmt_C`、`FB_CN_NoComment2` 实测生成 + 0 error）。`plc_tia ... autoFix:true` 会在临时副本里删除行尾注释再导入，结果报告删除条数和被跳过的块；`plan` 也会先对这一情况告警。
+- **TIA SCL 导入的真实坑（已修正结论）**：不是中文标识符，而是**文件编码 + 行尾 `//` 注释**：
+  - 无 BOM 的 UTF-8 `.scl` 会被 TIA 当 ANSI 读，中文标签名变成乱码（`Tag "鑷姩杩愯鏍囧織" not defined`）；现在每次导入都用 **UTF-8 BOM 临时副本**（原文件不动），实测中文标签引用正常。
+  - 行尾 `//` 注释会让 TIA 报 Success 却整块跳过（`FB_Skip_B`），去掉后正常生成并编译；行首注释、`(* *)` 块注释、中文标识符本身都没问题。
+  - `plc_tia ... autoFix:true` 在临时副本里额外删除行尾注释，并报告删除条数与被跳过的块。
+- **TIA 真实工程闭环（项目A.ap16 副本）**：`listTags` 读到 75 个中文标签（`启动 %I0.0`、`自动运行标志 %M100.0`…）；`readBlocks` 读到 7 个块，含 `气缸块` 的 `Input 6/Output 3/InOut 1/Static 4` 和 `点位参数` 的 6 个 DB 成员。写入 SCL 后导入生成 `FB_AgentPlcWatch`（直接引用 `启动/停止/自动运行标志` 三个真实标签）和 `FB_AgentPlcEdge`，两个块均编译 Success，回读接口正确。整个 PLC 编译仍是 Error，但错误被精确归到**工程原有的空 UDT `用户数据类型_1`**（`A structure without components is not allowed. [Interface]`），不是新导入的块——这也验证了错误归属能力。
 - **面板块接口**：`tiaBlocks`（面板 `/agentplc/api/tia/blocks` 与 `plc_tia readBlocks` 共用）实测 `BrokenTest` 的 `Main`（OB）读出 `Input 2`（`Initial_Call`、`Remanence` 带注释）；不一致的块明确提示「先修编译错误再读」。
 - **`.ap18` / `.ap16` 真实生成**：`plc_tia run create` 在本机创建 `AgentPlcDemo.ap18`（V18 API，PLC_1 + 导入 `FB_Conveyor.scl`，编译 `Success`，`list` 读回 `Main, FB_Conveyor`）和 `AgentPlcV16.ap16`（V16 API，PLC_1，编译 `Success`）。
 - `plc_tia run importScl` 对已有工程导入 SCL 并编译，返回 `state: Success` 与编译器消息。
