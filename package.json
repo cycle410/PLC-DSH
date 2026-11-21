@@ -1,6 +1,6 @@
 {
   "name": "@local/dsh-agentplc",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "description": "Left-sidebar PLC engineering workspace for OMRON Sysmac Studio and Siemens TIA Portal.",

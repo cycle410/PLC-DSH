@@ -139,11 +139,33 @@ window.__ModuleLoader__.load({
         'tia.blocks': '块',
         'tia.types': '数据类型',
         'tia.openHint': '首次读取可能弹出「Openness 访问」提示，选「全部确定」即可。',
+        'io.title': 'IO 清单',
+        'io.direction': '方向',
+        'io.read': '读取 IO 清单',
+        'io.reading': '正在读取…',
+        'io.reload': '刷新清单',
+        'io.note': '只读：把工程里已有的变量按输入 / 输出 / IO 区 / 存储 / 内部归类；不修改工程，地址与任务仍由你在工程里分配。',
+        'io.noteTia': 'TIA 工程通过 Openness 读取：会后台打开博途，约 40 秒；只读，不修改工程。',
+        'io.search': '按名称 / 地址 / 注释筛选',
+        'io.empty': '工程里没有变量',
+        'io.noAddress': '还没有分配地址的变量；IO 分配由你在工程里完成。',
+        'io.all': '全部',
+        'io.input': '输入',
+        'io.output': '输出',
+        'io.io': 'IO 区',
+        'io.memory': '存储',
+        'io.internal': '内部',
+        'io.name': '名称',
+        'io.address': '地址',
+        'io.type': '类型',
+        'io.table': '变量表',
+        'io.csv': '导出 IO CSV',
+        'io.rows': '{shown} / {total} 行',
         'copy': '复制指令',
         'copied': '已复制',
         'copyFailed': '复制失败，请手动选中',
-        'copy.sysmac': '用 plc_sysmac 读取工程「{path}」：先给控制器、POU 和变量表概览；需要改程序时，请给我改好的 ST 片段和变量 CSV（.smc2 只读，我不会直接改它）。',
-        'copy.tia': '用 plc_tia 打开博途工程「{path}」：先用 action=plan、operation=list 生成并审查命令，确认后用 action=run、operation=list 列出设备和 PLC 块。',
+        'copy.sysmac': '用 plc_sysmac 读取工程「{path}」：先给控制器、POU 和变量表概览，再用 plc_io 看已有地址。改程序时把 ST 正文给我，用 create 生成工程并加 compile:true 跑原厂编译；全局变量只放普通类型，TON 放程序内 VAR，程序里用到的全局变量要写 VAR_EXTERNAL。',
+        'copy.tia': '用 plc_tia 打开博途工程「{path}」：先用 action=plan、operation=list 生成并审查命令，确认后用 action=run、operation=list 列出设备和 PLC 块；要读标签表就用 operation=listTags。',
         'download.failed': '下载失败：{error}',
         'error.prefix': '读取失败：{error}',
       },
@@ -280,11 +302,33 @@ window.__ModuleLoader__.load({
         'tia.blocks': 'blocks',
         'tia.types': 'types',
         'tia.openHint': 'The first read may show an "Openness access" prompt; choose "Allow all".',
+        'io.title': 'IO inventory',
+        'io.direction': 'Direction',
+        'io.read': 'Load IO inventory',
+        'io.reading': 'Reading…',
+        'io.reload': 'Reload inventory',
+        'io.note': 'Read-only: groups the variables that already exist into input / output / IO area / memory / internal. Nothing is changed; addresses and tasks stay with you.',
+        'io.noteTia': 'TIA projects are read through Openness: TIA opens in the background, about 40 seconds. Read-only.',
+        'io.search': 'Filter by name / address / comment',
+        'io.empty': 'This project has no variables',
+        'io.noAddress': 'No address is assigned yet; IO assignment stays with you in the project.',
+        'io.all': 'All',
+        'io.input': 'Input',
+        'io.output': 'Output',
+        'io.io': 'IO area',
+        'io.memory': 'Memory',
+        'io.internal': 'Internal',
+        'io.name': 'Name',
+        'io.address': 'Address',
+        'io.type': 'Type',
+        'io.table': 'Table',
+        'io.csv': 'Export IO CSV',
+        'io.rows': '{shown} / {total} rows',
         'copy': 'Copy prompt',
         'copied': 'Copied',
         'copyFailed': 'Copy failed; select the text manually',
-        'copy.sysmac': 'Use plc_sysmac to read the project "{path}": summarise the controller, POUs and variable tables first. When the program must change, give me the edited ST and a variable CSV — .smc2 stays read-only.',
-        'copy.tia': 'Use plc_tia on the TIA project "{path}": first action=plan, operation=list to generate and review the command, then action=run, operation=list to list devices and PLC blocks.',
+        'copy.sysmac': 'Use plc_sysmac to read the project "{path}": summarise the controller, POUs and variable tables first, then plc_io for the existing addresses. When the program must change, give me the ST body and use create with compile:true for a vendor compile; globals hold ordinary types only, TON instances go in the POU VAR, and every global a program uses needs a VAR_EXTERNAL mirror.',
+        'copy.tia': 'Use plc_tia on the TIA project "{path}": first action=plan, operation=list to generate and review the command, then action=run, operation=list to list devices and PLC blocks; operation=listTags reads the tag tables.',
         'download.failed': 'Download failed: {error}',
         'error.prefix': 'Read failed: {error}',
       },
@@ -505,6 +549,28 @@ window.__ModuleLoader__.load({
   padding: 2px 9px; font-size: 11.5px; color: var(--dsw-alias-label-secondary);
   background: var(--dsw-alias-bg-base);
 }
+.ap-chip.filter {
+  cursor: pointer; font: inherit; font-size: 11.5px; padding: 2px 9px;
+  transition: border-color 120ms ease, background 120ms ease, color 120ms ease;
+}
+.ap-chip.filter:hover { border-color: var(--dsw-alias-border-l2); color: var(--dsw-alias-label-primary); }
+.ap-chip.filter.active {
+  border-color: color-mix(in srgb, var(--dsw-alias-brand-primary) 55%, transparent);
+  background: color-mix(in srgb, var(--dsw-alias-brand-primary) 12%, var(--dsw-alias-bg-base));
+  color: var(--dsw-alias-label-primary);
+}
+.ap-io-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.ap-io-counts { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.ap-io-tools { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.ap-dir {
+  display: inline-block; white-space: nowrap;
+  font-size: 10px; letter-spacing: 0.02em; padding: 1px 7px; border-radius: 999px;
+  background: var(--dsw-alias-bg-layer-2); color: var(--dsw-alias-label-secondary);
+  border: 1px solid var(--dsw-alias-border-l1);
+}
+.ap-dir.input, .ap-dir.output { color: var(--dsw-alias-label-primary); }
+.ap-io-addr { font-family: var(--ap-mono); font-size: 10.5px; color: var(--dsw-alias-label-secondary); max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ap-io-table-name { font-size: 11px; color: var(--dsw-alias-label-secondary); }
 .ap-note {
   border: 1px solid var(--dsw-alias-border-l1);
   border-left: 3px solid var(--dsw-alias-state-warn-primary);
@@ -1293,6 +1359,7 @@ window.__ModuleLoader__.load({
             { label: t('meta.modified'), value: formatDate(project.modifiedAt) },
           ],
         }),
+        h(IoPanel, { project, t }),
         h(
           'div',
           { className: 'ap-tabs', role: 'tablist' },
@@ -1510,6 +1577,7 @@ window.__ModuleLoader__.load({
           ],
         }),
         h('div', { className: 'ap-note' }, t('tia.noteLocal')),
+        h(IoPanel, { project, t }),
         h(
           'div',
           { className: 'ap-actions' },
@@ -1562,6 +1630,167 @@ window.__ModuleLoader__.load({
           )
         }),
         h('div', { className: 'ap-hint' }, t('tia.openHint')),
+      )
+    }
+
+    const IO_DIRECTIONS = ['input', 'output', 'io', 'memory', 'internal']
+
+    function IoTable({ rows, t }) {
+      return h(
+        'div',
+        { className: 'ap-table-wrap' },
+        h(
+          'table',
+          { className: 'ap-table' },
+          h(
+            'thead',
+            null,
+            h(
+              'tr',
+              null,
+              h('th', null, t('io.direction')),
+              h('th', null, t('io.name')),
+              h('th', null, t('io.address')),
+              h('th', null, t('io.type')),
+              h('th', null, t('io.table')),
+            ),
+          ),
+          h(
+            'tbody',
+            null,
+            rows.map((row, index) =>
+              h(
+                'tr',
+                { key: `${row.table}-${row.name}-${index}` },
+                h('td', null, h('span', { className: `ap-dir ${row.direction}` }, t(`io.${row.direction}`))),
+                h('td', null, row.name),
+                h('td', { className: 'ap-io-addr', title: row.address || undefined }, row.address || '—'),
+                h('td', { className: 'mono' }, row.dataType || '—'),
+                h('td', { className: 'ap-io-table-name' }, row.table),
+              ),
+            ),
+          ),
+        ),
+      )
+    }
+
+    function IoPanel({ project, t }) {
+      const [state, setState] = React.useState({ loading: false, inventory: null, error: null })
+      const [direction, setDirection] = React.useState('')
+      const [query, setQuery] = React.useState('')
+
+      const load = async () => {
+        setState({ loading: true, inventory: null, error: null })
+        try {
+          const response = await fetch(`/agentplc/api/io?path=${encodeURIComponent(project.path)}&fresh=1`, {
+            credentials: 'same-origin',
+            headers: { accept: 'application/json' },
+          })
+          const text = await response.text()
+          let payload
+          try {
+            payload = JSON.parse(text)
+          } catch {
+            payload = { ok: false, error: text.slice(0, 200) || `HTTP ${response.status}` }
+          }
+          if (!response.ok || !payload.ok) setState({ loading: false, inventory: null, error: payload.error ?? `HTTP ${response.status}` })
+          else setState({ loading: false, inventory: payload.inventory, error: null })
+        } catch (error) {
+          setState({ loading: false, inventory: null, error: error?.message ?? String(error) })
+        }
+      }
+
+      const inventory = state.inventory
+      const items = inventory?.items ?? []
+      const counts = inventory?.counts ?? {}
+      const filtered = React.useMemo(() => {
+        const needle = query.trim().toLowerCase()
+        return items.filter(
+          (item) =>
+            (direction === '' || item.direction === direction) &&
+            (needle === '' ||
+              [item.name, item.address, item.dataType, item.comment, item.table, item.pou].join(' ').toLowerCase().includes(needle)),
+        )
+      }, [items, direction, query])
+      const shown = filtered.slice(0, 400)
+
+      return h(
+        'div',
+        { className: 'ap-section' },
+        h(
+          'div',
+          { className: 'ap-io-head' },
+          h('span', { className: 'ap-section-title' }, t('io.title')),
+          h(
+            'div',
+            { className: 'ap-io-tools' },
+            inventory
+              ? h(DownloadButton, {
+                  url: `/agentplc/api/io.csv?path=${encodeURIComponent(project.path)}`,
+                  fileName: `${project.name}-io.csv`,
+                  label: t('io.csv'),
+                  t,
+                })
+              : null,
+            h(
+              'button',
+              { type: 'button', className: 'ap-btn primary', onClick: load, disabled: state.loading },
+              state.loading ? t('io.reading') : inventory ? t('io.reload') : t('io.read'),
+            ),
+          ),
+        ),
+        h('div', { className: 'ap-hint' }, project.kind === 'tia' ? t('io.noteTia') : t('io.note')),
+        state.error ? h('div', { className: 'ap-error' }, t('error.prefix', { error: state.error })) : null,
+        inventory
+          ? h(
+              React.Fragment,
+              null,
+              h(
+                'div',
+                { className: 'ap-io-counts' },
+                [['', t('io.all'), counts.total ?? 0], ...IO_DIRECTIONS.map((key) => [key, t(`io.${key}`), counts[key] ?? 0])].map(
+                  ([value, label, count]) =>
+                    h(
+                      'button',
+                      {
+                        key: value || 'all',
+                        type: 'button',
+                        className: `ap-chip filter${direction === value ? ' active' : ''}`,
+                        onClick: () => setDirection(value),
+                        'aria-pressed': direction === value,
+                      },
+                      `${label} ${count}`,
+                    ),
+                ),
+              ),
+              items.length === 0
+                ? h('div', { className: 'ap-hint' }, t('io.empty'))
+                : (counts.addressed ?? 0) === 0
+                  ? h('div', { className: 'ap-note' }, t('io.noAddress'))
+                  : null,
+              items.length > 0
+                ? h(
+                    React.Fragment,
+                    null,
+                    h(
+                      'div',
+                      { className: 'ap-io-tools' },
+                      h('input', {
+                        className: 'ap-search',
+                        value: query,
+                        placeholder: t('io.search'),
+                        'aria-label': t('io.search'),
+                        onChange: (event) => setQuery(event.target.value),
+                      }),
+                      h('span', { className: 'ap-hint' }, t('io.rows', { shown: shown.length, total: filtered.length })),
+                    ),
+                    shown.length > 0
+                      ? h(IoTable, { rows: shown, t })
+                      : h('div', { className: 'ap-hint' }, t('variables.empty')),
+                  )
+                : null,
+            )
+          : null,
       )
     }
 

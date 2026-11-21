@@ -5,6 +5,7 @@
 ## 面板能做什么
 
 - **离线读 `.smc2`**：不需要装 Sysmac Studio。控制器型号/固件、任务、POU 列表、每个 POU 的 ST 源码或梯形图梯级、全局与局部变量表都能读出来，变量表可一键导出 CSV。
+- **统一 IO 清单**：把欧姆龙和西门子的地址收敛成同一张表——每条变量/标签标成**输入 / 输出 / IO 区 / 存储 / 内部**，带地址、数据类型、注释和所属变量表（局部表会标出所属 POU）。`.smc2` 离线解析；博途工程走 Openness。面板可筛选、导出 CSV，Agent 用 `plc_io` 读同一份数据。只读，不会替你分配地址。
 - **识别博途工程**：不要求文件夹名以 `.ap16/.ap18` 结尾——只要文件夹里有 `<name>.ap16/.ap18` 文件（旁边有 `System/`、`IM/` 等项目结构）就会被识别，并标出版本。点「读取设备与块」会通过 Openness 列出设备和全部程序块（首次会启动后台 TIA，约 20–40 秒）。
 - **静态校验**：选中 `.smc2` 点「运行校验」，离线检查未声明标识符、重复变量、重复 AT 地址、IF/CASE/FOR/WHILE 块不配平，直接列出 POU 和行号；生成工程时自动跑一次。
 - **ST → Sysmac XML**：把 `.st` 源文件（`TYPE` / `FUNCTION_BLOCK` / `PROGRAM`）转换成 Sysmac Studio 可导入的 **IEC 61131-10 XML**。转换器沿用工作区里已用官方 XSD 校验过的那套实现。
@@ -48,7 +49,7 @@
 第 2 次 create（variablesMode=merge，补上 启动按钮/报警灯）→ Static check: 0；Vendor compile: 0 error(s), 0 warning(s)
 ```
 
-- **新增 POU**：`create` 的 `newPous: [{name, stText, variables}]` 会克隆模板里的 ST 程序实体（新 GUID、正文、局部变量表、任务关联），重名直接报错，失败时删除半成品。实测新增 `PRG_NewDemo2`（局部变量 `计数2`）后原厂编译 `0 error(s), 0 warning(s)`。
+- **新增 POU**：`create` 的 `newPous: [{name, stText, variables}]` 会克隆模板里的 ST 程序实体（新 GUID、正文、局部变量表、任务关联），重名直接报错，失败时删除半成品。默认挂到模板的第一个任务，结果里会写明挂到了哪个任务（`task`）；要挂到指定任务用 `taskName`，不想挂（自己在 Sysmac 里分配）用 `associateTask: false`。实测新增 `PRG_NewDemo2`（局部变量 `计数2`）后原厂编译 `0 error(s), 0 warning(s)`。
 
 错误用来改，警告一般可以忽略（`warningCount` 仍会返回，但不挡流程）。也可以单独用 `plc_sysmac action=compile path=...` 复查，它会复制一份工程、先按 F7「检查所有程序」、再「重编译控制器」，重编译确认框自动点「是(Y)」，然后读回错误/警告数量和每条消息（含 POU、行、列）。实测坏工程返回：
 
@@ -101,9 +102,9 @@
 主面板的用法：
 
 - 左栏列出扫描目录里的 `.smc2` / 博途工程目录 / `.st` 源文件，可搜索。
-- 选 `.smc2`：概览（控制器、任务、变量表、解析提示）、变量（搜索 + 下载 CSV）、程序（POU 列表 → ST 源码或梯形图逐级；MultipartLadder 的每一段分开显示，内嵌 ST 可展开）。
+- 选 `.smc2`：概览（控制器、任务、变量表、解析提示）、**IO 清单**、变量（搜索 + 下载 CSV）、程序（POU 列表 → ST 源码或梯形图逐级；MultipartLadder 的每一段分开显示，内嵌 ST 可展开）。
 - 选 `.st`：预览源码，一键生成并下载 Sysmac 可导入的 XML；失败时面板内显示原因，不会跳转。
-- 选博途工程：说明为什么必须走 Openness，并给出可复制的 Agent 指令。
+- 选博途工程：说明为什么必须走 Openness，给出可复制的 Agent 指令；**IO 清单**同样能读（后台启动博途，约 40 秒）。
 - 顶部三张卡片是环境体检；「刷新」会重新扫描目录并重读当前工程。
 
 ## Agent 工具
@@ -111,9 +112,10 @@
 | 工具 | 用途 |
 |---|---|
 | `plc_env` | 探测本机 PLC 工具链（只读） |
-| `plc_sysmac` | `scan` / `overview` / `variables` / `pou` / `export-variables`：离线读 `.smc2` |
+| `plc_sysmac` | `scan` / `overview` / `variables` / `pou` / `export-variables` / `design` / `create` / `verify` / `compile`：读写 `.smc2`、静态校验、原厂编译 |
 | `plc_st` | `scan` / `convert`：`.st` → Sysmac 可导入的 IEC 61131-10 XML |
-| `plc_tia` | `plan` / `run`：通过 TIA Openness 列块、导入 SCL、编译、导出块 |
+| `plc_tia` | `plan` / `run`：通过 TIA Openness 建工程、列块、导入 SCL、编译、导出块、读标签表 |
+| `plc_io` | 统一 IO 清单：输入 / 输出 / IO 区 / 存储 / 内部，带地址与所属变量表（只读） |
 
 面板和工具用的是同一套 Host 实现，面板上的按钮只是把这些操作做成了可视化入口。
 
@@ -169,11 +171,13 @@
     - id: agentplc
       name: '@local/dsh-agentplc'
       config:
-        projectRoots: []          # 额外扫描目录；留空则用 文档 / 桌面 / OneDrive\文档
-        scanDepth: 4              # 扫描深度
-        scanLimit: 200            # 最多列出多少个工程
+        projectRoots: []          # 扫描目录；留空则不扫描任何目录，在面板里「添加文件夹 / 浏览…」即可
+        scanDepth: 8              # 扫描深度（1–12）
+        scanLimit: 2000           # 最多列出多少个工程（1–5000）
         tiaDefaultVersion: V16    # 建工程时没写 .ap<版本> 后缀用的版本（本机默认 V16）
 ```
+
+面板里添加的目录会存到 `%APPDATA%\dsh-agentplc\roots.json`，和上面的 `projectRoots` 合并生效；删除某个目录后，它下面的工程会立刻从列表消失。插件**不预设** Documents / Desktop。
 
 面板只展示**扫描目录内**的工程；`plc_sysmac` / `plc_st` 也只接受这些目录内的路径，避免面板变成任意文件读取入口。
 
@@ -205,6 +209,8 @@
 - **静态校验**：故意写坏的工程报 `2 error(s)`（未声明变量A/B，带行号），正常工程报 `0 error(s)`；`plc_sysmac create` 生成时自动校验，坏样例直接返回 `1 error(s) — 未声明标识符 未声明输出（第 2 行）`；面板路由 `/agentplc/api/sysmac/verify` 返回 200 和问题列表。
 - **原厂编译校验**：`plc_sysmac compile` 在提权副本上执行 F7「检查所有程序」+「重编译控制器」（自动确认「所有程序将重新编译，你要继续吗？」→ 是(Y)），从编译窗口读回 `2 error(s), 0 warning(s)` 和两条带 `PRG_Init line 3/4` 的消息；探针实例跑完自动关闭，原工程未改动。
 - `plc_tia plan`（create/list/importScl 等）能按工程后缀选中 V16 或 V18 API 并生成命令文件。
+- **统一 IO 清单**：`真实工程.smc2` 608 个变量 → 6 输入 / 1 输出 / 601 内部（7 个有地址，EtherCAT 输入输出按对象路径分对）；`现场V18工程` 140 个标签 → 84 输入 / 42 输出 / 14 存储，地址全部识别，标签注释从 Openness 的 `MultilingualText` 正确取文本。面板路由 `/agentplc/api/io` 与 `/agentplc/api/io.csv`（UTF-8 BOM + CRLF）实测 200，CSV 51 KB。
+- **非 ASCII SCL 预警**：`plc_tia plan` 发现源文件代码里（注释和字符串除外）有中文标识符时会先给出警告，避免「返回 Success 但块没生成」；纯中文注释不误报（`FB_StarDelta_EN.scl` 不报，`FB_StarDelta.scl` 报）。
 - **`.ap18` / `.ap16` 真实生成**：`plc_tia run create` 在本机创建 `AgentPlcDemo.ap18`（V18 API，PLC_1 + 导入 `FB_Conveyor.scl`，编译 `Success`，`list` 读回 `Main, FB_Conveyor`）和 `AgentPlcV16.ap16`（V16 API，PLC_1，编译 `Success`）。
 - `plc_tia run importScl` 对已有工程导入 SCL 并编译，返回 `state: Success` 与编译器消息。
 
@@ -223,7 +229,7 @@
 
 ## 部署到你的 DSH agent
 
-本插件是一个 DSH bundle：装进 DSH 后会在左侧栏出现「PLC 工程台」入口，并注册 4 个工具（`plc_env`、`plc_sysmac`、`plc_st`、`plc_tia`）。
+本插件是一个 DSH bundle：装进 DSH 后会在左侧栏出现「PLC 工程台」入口，并注册 5 个工具（`plc_env`、`plc_sysmac`、`plc_st`、`plc_tia`、`plc_io`）。
 
 ### 前提
 
@@ -268,9 +274,9 @@ npm pack
 - id: agentplc
   name: "@local/dsh-agentplc"
   config:
-    projectRoots: ["D:/Projects", "D:/Documents"]   # 扫描哪些目录，留空 = 用户 Documents/Desktop
-    scanDepth: 3                                     # 目录深度
-    scanLimit: 200                                   # 最多收录多少项
+    projectRoots: ["D:/Projects", "D:/Documents"]   # 扫描目录，留空 = 不扫描，在面板里添加
+    scanDepth: 8                                     # 目录深度（1–12）
+    scanLimit: 2000                                  # 最多收录多少项（1–5000）
     tiaDefaultVersion: V16                           # 博途默认版本 V16/V18
   disabled: false
 ```
@@ -298,7 +304,7 @@ npm pack
 ### 常见问题
 
 - **侧栏没有入口**：确认插件已启用、DSH 已重启；客户端半区需要页面刷新。
-- **列表是 0 个工程**：检查 `projectRoots` 是否指向真实目录，或清空让它扫描默认的 Documents/Desktop。
+- **列表是 0 个工程**：插件默认不扫描任何目录，在面板点「添加文件夹」或「浏览…」选你的工程目录即可；也可以写进 `projectRoots`。
 - **编译一直等**：UAC 弹窗需要确认；不确认会在 2 分钟后超时。
 - **TIA 报 Openness 安全错误**：把当前用户加入 `Siemens TIA Openness` 组并重新登录。
 

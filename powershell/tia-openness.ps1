@@ -356,6 +356,78 @@ try {
           }
         })
     }
+    'compileUi' {
+      $clickScript = Join-Path $PSScriptRoot 'tia-click-text.ps1'
+      $clickResults = @()
+      foreach ($label in @('项目视图', 'Project view')) {
+        try {
+          & $clickScript -TitleFragment "$($project.Name)" -Text $label -Click | Out-Null
+          $clickResults += $label
+          Start-Sleep -Seconds 2
+        } catch { }
+      }
+      $compiled = Compile-PlcSoftware -Software $software
+      Start-Sleep -Seconds 2
+      foreach ($label in @('编译结果', 'Compile results')) {
+        try {
+          & $clickScript -TitleFragment "$($project.Name)" -Text $label | Out-Null
+          $clickResults += $label
+          Start-Sleep -Seconds 2
+        } catch { }
+      }
+      $ocrScript = Join-Path $PSScriptRoot 'tia-error-ocr.ps1'
+      $ocrFile = Join-Path $env:TEMP ('agentplc-tia-ocr-' + [guid]::NewGuid().ToString('N') + '.json')
+      $ocr = $null
+      try {
+        & $ocrScript -TitleFragment "$($project.Name)" -ResultPath $ocrFile -CropBottomFraction 0.5 | Out-Null
+        if (Test-Path -LiteralPath $ocrFile) { $ocr = Get-Content -LiteralPath $ocrFile -Raw -Encoding UTF8 | ConvertFrom-Json }
+      } catch { }
+      Write-Reply ([pscustomobject]@{
+          ok     = $true
+          action = 'compileUi'
+          data   = [pscustomobject]@{
+            project      = "$($project.Name)"
+            plc          = "$($software.Name)"
+            state        = $compiled.state
+            errorCount   = $compiled.errorCount
+            warningCount = $compiled.warningCount
+            messages     = $compiled.messages
+            ocrWindow    = if ($ocr) { $ocr.window } else { $null }
+            ocrErrors    = if ($ocr) { @($ocr.errorLines) } else { @() }
+            screenshot   = if ($ocr) { $ocr.screenshot } else { $null }
+            ocrError     = if ($ocr) { $ocr.error } else { 'OCR script produced no result.' }
+          }
+        })
+    }
+    'listTags' {
+      $tables = @()
+      foreach ($table in $software.TagTableGroup.TagTables) {
+        $tags = @()
+        foreach ($tag in $table.Tags) {
+          # Comment is a MultilingualText: "$($tag.Comment)" would print the CLR type name.
+          $comment = ''
+          try {
+            if ($null -ne $tag.Comment) {
+              foreach ($item in @($tag.Comment.Items)) {
+                if (-not [string]::IsNullOrWhiteSpace($item.Text)) { $comment = "$($item.Text)"; break }
+              }
+            }
+          } catch { $comment = '' }
+          $tags += [pscustomobject]@{
+            name    = "$($tag.Name)"
+            dataType = "$($tag.DataTypeName)"
+            address = "$($tag.LogicalAddress)"
+            comment = $comment
+          }
+        }
+        $tables += [pscustomobject]@{ name = "$($table.Name)"; tags = $tags }
+      }
+      Write-Reply ([pscustomobject]@{
+          ok     = $true
+          action = 'listTags'
+          data   = [pscustomobject]@{ project = "$($project.Name)"; plc = "$($software.Name)"; tables = $tables }
+        })
+    }
     default { throw "Unsupported action: $action" }
   }
 
