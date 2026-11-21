@@ -215,6 +215,7 @@
   - 无 BOM 的 UTF-8 `.scl` 会被 TIA 当 ANSI 读，中文标签名变成乱码（`Tag "鑷姩杩愯鏍囧織" not defined`）；现在每次导入都用 **UTF-8 BOM 临时副本**（原文件不动），实测中文标签引用正常。
   - 行尾 `//` 注释会让 TIA 报 Success 却整块跳过（`FB_Skip_B`），去掉后正常生成并编译；行首注释、`(* *)` 块注释、中文标识符本身都没问题。
   - `plc_tia ... autoFix:true` 在临时副本里额外删除行尾注释，并报告删除条数与被跳过的块。
+- **TIA V18 真实工程 0 错误闭环（现场V18工程 副本）**：`listTags` 读 `140` 个标签；`readBlocks` 读 10/34 个块，含 `模式设定`（FB：Input 12/Output 12/InOut 1/Static 6）、`触摸屏控制`（GlobalDB：32 个成员）、`测试工位气缸自动流程_DB`（实例 DB：31 个成员）。用真实标签 `Clock_10Hz %M0.0` 写两个 FB（`FB_AgentClkEdge` 上升沿计数、`FB_AgentCounter` 累加），导入后两个块均 `Block was successfully compiled`，整机编译 **`0 error(s), 1 warning(s)`**（warning 是工程原有的"使用了硬件组态里不存在的 I/O"），回读接口正确。
 - **TIA 删块闭环**：坏工程副本编译 `29 error(s)`（`OB_SD` 引用不存在的 DB 成员，错误带块名和行号）；`plc_tia ... operation=deleteBlocks blockPaths=["FB_Broken","OB_SD"]` 删掉两个坏块后，同一次调用内重编译 `Success`，随后单独 compile 也是 `0 error(s), 0 warning(s)`。
 - **TIA 真实工程闭环（项目A.ap16 副本）**：`listTags` 读到 75 个中文标签（`启动 %I0.0`、`自动运行标志 %M100.0`…）；`readBlocks` 读到 7 个块，含 `气缸块` 的 `Input 6/Output 3/InOut 1/Static 4` 和 `点位参数` 的 6 个 DB 成员。写入 SCL 后导入生成 `FB_AgentPlcWatch`（直接引用 `启动/停止/自动运行标志` 三个真实标签）和 `FB_AgentPlcEdge`，两个块均编译 Success，回读接口正确。整个 PLC 编译仍是 Error，但错误被精确归到**工程原有的空 UDT `用户数据类型_1`**（`A structure without components is not allowed. [Interface]`），不是新导入的块——这也验证了错误归属能力。
 - **面板块接口**：`tiaBlocks`（面板 `/agentplc/api/tia/blocks` 与 `plc_tia readBlocks` 共用）实测 `BrokenTest` 的 `Main`（OB）读出 `Input 2`（`Initial_Call`、`Remanence` 带注释）；不一致的块明确提示「先修编译错误再读」。
