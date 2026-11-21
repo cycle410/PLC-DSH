@@ -128,7 +128,7 @@
 2. **程序里用到的每个全局变量，都必须在该程序里再声明一次 `VAR_EXTERNAL`**（同名同类型，`scope: "VAR_EXTERNAL"`）。漏了就会报「未定义的标识符」。
 3. **只支持 ST 语言**；不自动做 IO 分配（`AT %IX/%QX`）和任务设置，这两项需要在 Sysmac 里手动做。
 4. 生成后带 `compile: true` 跑原厂编译，按返回的错误改；警告一般可忽略。
-5. 需要一个真实 `.smc2` 作模板；仓库里的 `examples/AgentPLC_Demo.smc2` 是脱敏最小模板，可直接用来试。
+5. 需要一个真实 `.smc2` 作模板；仓库里的 `examples/AgentPLC_Demo.smc2` 是脱敏最小模板，可直接用来试（它在插件目录里，`plc_sysmac create` 支持把它当模板；不传 `output` 时会写到「文档」目录）。
 
 最小调用示例（双线圈气缸）：
 
