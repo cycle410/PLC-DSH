@@ -2,8 +2,12 @@
     - id: agentplc
       name: '@local/dsh-agentplc'
       config:
-        # Extra directories scanned for OMRON .smc2 and TIA Portal .ap*/.zap* projects.
-        # Empty means the user's Documents and Desktop folders.
+        # Directories scanned for OMRON .smc2 and TIA Portal .ap* projects.
+        # No defaults: the list starts empty and is managed from the panel
+        # (add a folder by path or with the native "Browse…" dialog, remove with the root list).
         projectRoots: []
-        scanDepth: 3
-        scanLimit: 200
+        # Deep enough for real project trees such as <plant>/<line>/<station>/<project>.
+        scanDepth: 8
+        scanLimit: 2000
+        # Used when a TIA project is created without an .ap<version> suffix.
+        tiaDefaultVersion: V16

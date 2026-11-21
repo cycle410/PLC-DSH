@@ -263,7 +263,7 @@ git clone https://github.com/cycle410/PLC-.git D:\tools\agentplc-plugin
 ```powershell
 cd D:\tools\agentplc-plugin
 npm pack
-# 得到 local-dsh-agentplc-0.1.0.tgz，交给别人
+# 得到 local-dsh-agentplc-<version>.tgz（当前 0.2.0），交给别人
 # 对方在 DSH 里 install_bundle，target 指向这个 tgz
 ```
 
