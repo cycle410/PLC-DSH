@@ -45,8 +45,8 @@ window.__ModuleLoader__.load({
         'list.counts': '{sysmac} 个 .smc2 · {tia} 个博途 · {st} 个 .st',
         'detail.emptyTitle': '选择一个工程',
         'detail.errorTitle': '读取失败',
-        'detail.emptyBody': '左侧选择 .smc2 工程可查看控制器、变量表和 ST 程序；选择 .st 源文件可以直接生成 Sysmac 可导入的 XML。',
-        'detail.emptyHint': '也可以直接在对话里让 Agent 操作：plc_env / plc_sysmac / plc_st / plc_tia',
+        'detail.emptyBody': '左侧选择 .smc2 或博途工程可查看控制器、变量表、ST 程序和 IO 清单；选择 .st 源文件可以直接生成 Sysmac 可导入的 XML。',
+        'detail.emptyHint': '编程任务直接在对话里说：先描述要求，Agent 会读工程（POU、变量、IO 清单）→ 给你方案，你确认后才写 ST/SCL 并跑编译，按真实错误修。IO 分配和任务设置仍由你在工程里做。',
         'detail.rootsConfig': '扫描目录由 agentplc.projectRoots 配置决定（profile 的 cordis.patch.yml）。',
         'tab.overview': '概览',
         'tab.variables': '变量',
@@ -89,10 +89,11 @@ window.__ModuleLoader__.load({
         'roots.deleteSelected': '删除选中',
         'roots.placeholder': '输入或粘贴文件夹路径，如 D:\\Projects',
         'create.title': '新建工程',
+        'create.example': '内置示例',
         'create.template': '模板工程',
         'create.name': '工程名',
         'create.output': '输出路径',
-        'create.outputHint': '留空则写到模板同目录',
+        'create.outputHint': '留空则写到模板同目录；用内置示例时写到「文档」目录',
         'create.variablesMode': '全局变量表',
         'create.pouName': '新增 POU 名称（可选）',
         'create.pouBody': 'ST 正文',
@@ -210,8 +211,8 @@ window.__ModuleLoader__.load({
         'list.counts': '{sysmac} .smc2 · {tia} TIA · {st} .st',
         'detail.emptyTitle': 'Select a project',
         'detail.errorTitle': 'Read failed',
-        'detail.emptyBody': 'Pick a .smc2 project to read its controller, variables and ST programs; pick a .st source to build the Sysmac-importable XML.',
-        'detail.emptyHint': 'Or drive it from the conversation: plc_env / plc_sysmac / plc_st / plc_tia',
+        'detail.emptyBody': 'Pick a .smc2 or TIA project to read its controller, variables, ST programs and IO inventory; pick a .st source to build the Sysmac-importable XML.',
+        'detail.emptyHint': 'Start a programming task in the conversation: describe the requirement; the agent reads the project (POUs, variables, IO inventory), proposes an approach, and only after your approval writes the ST/SCL, compiles it and fixes the real errors. IO and task assignment stay with you.',
         'detail.rootsConfig': 'Scanned folders come from the agentplc.projectRoots setting in the profile cordis.patch.yml.',
         'tab.overview': 'Overview',
         'tab.variables': 'Variables',
@@ -254,10 +255,11 @@ window.__ModuleLoader__.load({
         'roots.deleteSelected': 'Delete selected',
         'roots.placeholder': 'Type or paste a folder path, e.g. D:\\Projects',
         'create.title': 'New project',
+        'create.example': 'Bundled example',
         'create.template': 'Template project',
         'create.name': 'Project name',
         'create.output': 'Output path',
-        'create.outputHint': 'Leave empty to write next to the template',
+        'create.outputHint': 'Leave empty to write next to the template; the bundled example writes to Documents',
         'create.variablesMode': 'Global variable table',
         'create.pouName': 'New POU name (optional)',
         'create.pouBody': 'ST body',
@@ -1820,8 +1822,24 @@ window.__ModuleLoader__.load({
     }
 
     function CreateDialog({ t, projects, onClose, onCreated }) {
-      const templates = (projects ?? []).filter((project) => project.kind === 'sysmac')
-      const [template, setTemplate] = React.useState(templates[0]?.path ?? '')
+      const scanned = React.useMemo(() => (projects ?? []).filter((project) => project.kind === 'sysmac'), [projects])
+      const [examples, setExamples] = React.useState([])
+      const [template, setTemplate] = React.useState('')
+      React.useEffect(() => {
+        const controller = new AbortController()
+        fetch('/agentplc/api/examples', { credentials: 'same-origin', headers: { accept: 'application/json' }, signal: controller.signal })
+          .then((response) => response.json())
+          .then((data) => setExamples(Array.isArray(data?.examples) ? data.examples : []))
+          .catch(() => {})
+        return () => controller.abort()
+      }, [])
+      const templates = React.useMemo(() => {
+        const seen = new Set(scanned.map((project) => project.path))
+        return [...scanned, ...examples.filter((example) => !seen.has(example.path))]
+      }, [scanned, examples])
+      React.useEffect(() => {
+        if (!template && templates.length > 0) setTemplate(templates[0].path)
+      }, [template, templates])
       const [projectName, setProjectName] = React.useState('AgentPLC_新建工程')
       const [output, setOutput] = React.useState('')
       const [variablesMode, setVariablesMode] = React.useState('keep')
@@ -1886,7 +1904,13 @@ window.__ModuleLoader__.load({
             h(
               'select',
               { value: template, onChange: (event) => setTemplate(event.target.value) },
-              templates.map((project) => h('option', { key: project.path, value: project.path }, `${project.name} — ${project.path}`)),
+              templates.map((project) =>
+                h(
+                  'option',
+                  { key: project.path, value: project.path },
+                  project.bundled ? `${t('create.example')} · ${project.name}` : `${project.name} — ${project.path}`,
+                ),
+              ),
             ),
           ),
           h('label', { className: 'ap-field' }, t('create.name'), h('input', { value: projectName, onChange: (event) => setProjectName(event.target.value) })),
