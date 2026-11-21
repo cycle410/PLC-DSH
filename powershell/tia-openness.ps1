@@ -317,6 +317,35 @@ try {
           }
         })
     }
+    'deleteBlocks' {
+      $deleted = @()
+      foreach ($blockPath in $command.blockPaths) {
+        $block = $null
+        try { $block = Find-Block -Group $software.BlockGroup -Path $blockPath } catch { $block = $null }
+        if ($null -eq $block) {
+          $leaf = ($blockPath -split '/')[-1]
+          $block = Find-BlockAnywhere -Group $software.BlockGroup -Name $leaf
+        }
+        if ($null -eq $block) { throw "Block not found: $blockPath" }
+        $name = "$($block.Name)"
+        $block.Delete()
+        $deleted += $name
+      }
+      $compiled = Compile-PlcSoftware -Software $software
+      Write-Reply ([pscustomobject]@{
+          ok     = $true
+          action = 'deleteBlocks'
+          data   = [pscustomobject]@{
+            project      = "$($project.Name)"
+            plc          = "$($software.Name)"
+            deleted      = $deleted
+            state        = $compiled.state
+            errorCount   = $compiled.errorCount
+            warningCount = $compiled.warningCount
+            messages     = $compiled.messages
+          }
+        })
+    }
     'compile' {
       $compiled = Compile-PlcSoftware -Software $software
       Write-Reply ([pscustomobject]@{

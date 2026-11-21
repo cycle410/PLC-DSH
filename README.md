@@ -10,7 +10,7 @@
 - **识别博途工程**：不要求文件夹名以 `.ap16/.ap18` 结尾——只要文件夹里有 `<name>.ap16/.ap18` 文件（旁边有 `System/`、`IM/` 等项目结构）就会被识别，并标出版本。点「读取设备与块」会通过 Openness 列出设备和全部程序块（首次会启动后台 TIA，约 20–40 秒）。
 - **静态校验**：选中 `.smc2` 点「运行校验」，离线检查未声明标识符、重复变量、重复 AT 地址、IF/CASE/FOR/WHILE 块不配平，直接列出 POU 和行号；生成工程时自动跑一次。
 - **ST → Sysmac XML**：把 `.st` 源文件（`TYPE` / `FUNCTION_BLOCK` / `PROGRAM`）转换成 Sysmac Studio 可导入的 **IEC 61131-10 XML**。转换器沿用工作区里已用官方 XSD 校验过的那套实现。
-- **博途 Openness**：用官方 `Siemens.Engineering` 接口列设备/块、导入 SCL 外部源并编译、编译 PLC、导出块 XML、读标签表，以及**读块接口**（`readBlocks`：输入/输出/InOut/Static/Temp/Constant 成员，带类型、起始值和注释）。`plan` 只生成命令文件不动博途，`run` 才真正连博途。
+- **博途 Openness**：用官方 `Siemens.Engineering` 接口列设备/块、导入 SCL 外部源并编译、编译 PLC、导出块 XML、读标签表、读块接口（`readBlocks`：输入/输出/InOut/Static/Temp/Constant 成员，带类型、起始值和注释），以及**删块**（`deleteBlocks`，用于清掉生成失败的块）。`plan` 只生成命令文件不动博途，`run` 才真正连博途。
 - **工具链体检**：TIA Portal / Openness 程序集 / `Siemens TIA Openness` 用户组、Sysmac Studio、.NET Framework、PowerShell、Python 3，一次看清。
 
 ## 直接生成工程文件
@@ -115,7 +115,7 @@
 | `plc_env` | 探测本机 PLC 工具链（只读） |
 | `plc_sysmac` | `scan` / `overview` / `variables` / `pou` / `export-variables` / `design` / `create` / `verify` / `compile`：读写 `.smc2`、静态校验、原厂编译 |
 | `plc_st` | `scan` / `convert`：`.st` → Sysmac 可导入的 IEC 61131-10 XML |
-| `plc_tia` | `plan` / `run`：通过 TIA Openness 建工程、列块、导入 SCL、编译、导出块、读标签表、读块接口（`readBlocks`） |
+| `plc_tia` | `plan` / `run`：通过 TIA Openness 建工程、列块、导入 SCL、删块、编译、导出块、读标签表、读块接口（`readBlocks`） |
 | `plc_io` | 统一 IO 清单：输入 / 输出 / IO 区 / 存储 / 内部，带地址与所属变量表（只读） |
 
 面板和工具用的是同一套 Host 实现，面板上的按钮只是把这些操作做成了可视化入口。
@@ -215,6 +215,7 @@
   - 无 BOM 的 UTF-8 `.scl` 会被 TIA 当 ANSI 读，中文标签名变成乱码（`Tag "鑷姩杩愯鏍囧織" not defined`）；现在每次导入都用 **UTF-8 BOM 临时副本**（原文件不动），实测中文标签引用正常。
   - 行尾 `//` 注释会让 TIA 报 Success 却整块跳过（`FB_Skip_B`），去掉后正常生成并编译；行首注释、`(* *)` 块注释、中文标识符本身都没问题。
   - `plc_tia ... autoFix:true` 在临时副本里额外删除行尾注释，并报告删除条数与被跳过的块。
+- **TIA 删块闭环**：坏工程副本编译 `29 error(s)`（`OB_SD` 引用不存在的 DB 成员，错误带块名和行号）；`plc_tia ... operation=deleteBlocks blockPaths=["FB_Broken","OB_SD"]` 删掉两个坏块后，同一次调用内重编译 `Success`，随后单独 compile 也是 `0 error(s), 0 warning(s)`。
 - **TIA 真实工程闭环（项目A.ap16 副本）**：`listTags` 读到 75 个中文标签（`启动 %I0.0`、`自动运行标志 %M100.0`…）；`readBlocks` 读到 7 个块，含 `气缸块` 的 `Input 6/Output 3/InOut 1/Static 4` 和 `点位参数` 的 6 个 DB 成员。写入 SCL 后导入生成 `FB_AgentPlcWatch`（直接引用 `启动/停止/自动运行标志` 三个真实标签）和 `FB_AgentPlcEdge`，两个块均编译 Success，回读接口正确。整个 PLC 编译仍是 Error，但错误被精确归到**工程原有的空 UDT `用户数据类型_1`**（`A structure without components is not allowed. [Interface]`），不是新导入的块——这也验证了错误归属能力。
 - **面板块接口**：`tiaBlocks`（面板 `/agentplc/api/tia/blocks` 与 `plc_tia readBlocks` 共用）实测 `BrokenTest` 的 `Main`（OB）读出 `Input 2`（`Initial_Call`、`Remanence` 带注释）；不一致的块明确提示「先修编译错误再读」。
 - **`.ap18` / `.ap16` 真实生成**：`plc_tia run create` 在本机创建 `AgentPlcDemo.ap18`（V18 API，PLC_1 + 导入 `FB_Conveyor.scl`，编译 `Success`，`list` 读回 `Main, FB_Conveyor`）和 `AgentPlcV16.ap16`（V16 API，PLC_1，编译 `Success`）。
