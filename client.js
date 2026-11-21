@@ -1978,16 +1978,20 @@ window.__ModuleLoader__.load({
           return
         }
         setStatus({ running: true, error: null, result: null })
-        const params = new URLSearchParams({ template, projectName, variablesMode, compile: String(compile), overwrite: String(overwrite) })
-        if (output.trim()) params.set('output', output.trim())
-        if (pouName.trim()) {
-          params.set('newPous', JSON.stringify([{ name: pouName.trim(), stText: pouBody }]))
-          params.set('variablesMode', variablesMode)
-        }
         try {
-          const response = await fetch(`/agentplc/api/create?${params.toString()}`, {
+          const response = await fetch('/agentplc/api/create', {
+            method: 'POST',
             credentials: 'same-origin',
-            headers: { accept: 'application/json' },
+            headers: { accept: 'application/json', 'content-type': 'application/json' },
+            body: JSON.stringify({
+              template,
+              projectName,
+              variablesMode,
+              compile,
+              overwrite,
+              output: output.trim() || undefined,
+              newPous: pouName.trim() ? [{ name: pouName.trim(), stText: pouBody }] : undefined,
+            }),
           })
           const payload = await response.json()
           if (!response.ok || !payload.ok) {
@@ -2197,7 +2201,6 @@ window.__ModuleLoader__.load({
         return btoa(binary)
       }
 
-      const folderInputRef = React.useRef(null)
       const [rootError, setRootError] = React.useState(null)
 
       const addRootPath = async (value) => {
@@ -2222,34 +2225,19 @@ window.__ModuleLoader__.load({
         }
       }
 
-      const handlePickedFolder = async (event) => {
-        const file = event.target.files && event.target.files[0]
-        event.target.value = ''
-        if (!file) return
-        const full = typeof file.path === 'string' ? file.path : ''
-        if (!full) {
+      /** The Host-native picker is the only reliable way to get a folder path in the desktop shell. */
+      const browseFolder = async () => {
+        const uiWorkspace = typeof ctx.get === 'function' ? ctx.get('uiWorkspace') : undefined
+        if (!uiWorkspace || typeof uiWorkspace.pickDirectory !== 'function') {
           setRootError(t('roots.pickUnavailable'))
           return
         }
-        await addRootPath(full.replace(/[\\/][^\\/]*$/, '') || full)
-      }
-
-      /**
-       * Prefer DSH's own directory picker. Recent Electron builds no longer expose File.path,
-       * so the hidden <input webkitdirectory> let the user pick a folder but never yielded its path.
-       */
-      const browseFolder = async () => {
-        const uiWorkspace = typeof ctx.get === 'function' ? ctx.get('uiWorkspace') : undefined
-        if (uiWorkspace && typeof uiWorkspace.pickDirectory === 'function') {
-          try {
-            const picked = await uiWorkspace.pickDirectory()
-            if (picked) await addRootPath(picked)
-            return
-          } catch (error) {
-            setRootError(t('roots.addFailed', { error: error?.message ?? String(error) }))
-          }
+        try {
+          const picked = await uiWorkspace.pickDirectory()
+          if (picked) await addRootPath(picked)
+        } catch (error) {
+          setRootError(t('roots.addFailed', { error: error?.message ?? String(error) }))
         }
-        folderInputRef.current?.click()
       }
 
       const addRoot = async () => {
@@ -2301,6 +2289,7 @@ window.__ModuleLoader__.load({
               type: 'text',
               className: 'ap-input',
               placeholder: t('roots.placeholder'),
+              'aria-label': t('roots.placeholder'),
               value: rootInput,
               onChange: (event) => setRootInput(event.target.value),
               onKeyDown: (event) => {
@@ -2308,14 +2297,6 @@ window.__ModuleLoader__.load({
               },
             }),
             h('button', { type: 'button', className: 'ap-btn', onClick: addRoot }, t('roots.add')),
-            h('input', {
-              type: 'file',
-              multiple: true,
-              webkitdirectory: 'true',
-              style: { display: 'none' },
-              ref: folderInputRef,
-              onChange: handlePickedFolder,
-            }),
             h(
               'button',
               {
