@@ -1,6 +1,6 @@
 # PLC 工程台 · AgentPLC workspace
 
-左侧栏里的 PLC 工程工作区，把对话、工程工具和项目知识放在同一个面板里。当前版本聚焦两条线：**欧姆龙 Sysmac Studio** 和 **西门子 TIA Portal**。仓库：<https://github.com/cycle410/PLC->
+左侧栏里的 PLC 工程工作区，把对话、工程工具和项目知识放在同一个面板里。当前版本聚焦两条线：**欧姆龙 Sysmac Studio** 和 **西门子 TIA Portal**。仓库：<https://github.com/cycle410/PLC-DSH>
 
 ## 面板能做什么
 
@@ -263,7 +263,7 @@
 ### 方式二：git clone + 本地联动（开发用）
 
 ```powershell
-git clone https://github.com/cycle410/PLC-.git D:\tools\agentplc-plugin
+git clone https://github.com/cycle410/PLC-DSH.git D:\tools\agentplc-plugin
 
 # 在 DSH profile 的 package.json 里加依赖并重新安装：
 #   "dependencies": { "@local/dsh-agentplc": "link:D:/tools/agentplc-plugin" }
