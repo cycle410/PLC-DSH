@@ -1,4 +1,4 @@
-﻿<#
+<#
 TIA Portal Openness driver for the DSH AgentPLC plugin.
 
 Reads one JSON command file, performs exactly one engineering action against a
@@ -28,21 +28,26 @@ function Get-CompilerState([object]$CompilerResult) {
 
 function Get-CompilerMessages([object]$CompilerResult) {
   $messages = New-Object System.Collections.ArrayList
-  function Collect-CompilerMessages([object]$node) {
+  function Collect-CompilerMessages([object]$node, [string]$block) {
     if ($null -eq $node) { return }
     try {
       foreach ($message in $node.Messages) {
+        $path = "$($message.Path)"
+        # A purely numeric path is a line inside the enclosing block, not the block itself.
+        $isLine = $path -match '^\d+$'
+        $blockPath = if (-not $isLine -and $path -ne '') { $path } else { $block }
         [void]$messages.Add([pscustomobject]@{
           state = "$($message.State)"
-          path  = "$($message.Path)"
+          path  = $path
+          block = $blockPath
           text  = "$($message.Description)"
           date  = "$($message.DateTime)"
         })
-        Collect-CompilerMessages $message
+        Collect-CompilerMessages $message $blockPath
       }
     } catch { }
   }
-  Collect-CompilerMessages $CompilerResult
+  Collect-CompilerMessages $CompilerResult ''
   return $messages
 }
 
