@@ -1,13 +1,13 @@
 # PLC 工程台 · AgentPLC workspace
 
-左侧栏里的 PLC 工程工作区，把对话、工程工具和项目知识放在同一个面板里。当前版本聚焦两条线：**欧姆龙 Sysmac Studio** 和 **西门子 TIA Portal**。
+左侧栏里的 PLC 工程工作区，把对话、工程工具和项目知识放在同一个面板里。当前版本聚焦两条线：**欧姆龙 Sysmac Studio** 和 **西门子 TIA Portal**。仓库：<https://github.com/cycle410/PLC->
 
 ## 面板能做什么
 
 - **离线读 `.smc2`**：不需要装 Sysmac Studio。控制器型号/固件、任务、POU 列表、每个 POU 的 ST 源码或梯形图梯级、全局与局部变量表都能读出来，变量表可一键导出 CSV。
 - **统一 IO 清单**：把欧姆龙和西门子的地址收敛成同一张表——每条变量/标签标成**输入 / 输出 / IO 区 / 存储 / 内部**，带地址、数据类型、注释和所属变量表（局部表会标出所属 POU）。`.smc2` 离线解析；博途工程走 Openness。面板可筛选、导出 CSV，Agent 用 `plc_io` 读同一份数据。只读，不会替你分配地址。
   识别范围：欧姆龙 `ECAT://node#[1,2]/Input Bit ...`、`IOBus://unit#2/...`、`BuiltInIO://cpu/#0/Input_Bit_00`、`%I/%Q`、`%D`（DM，归存储）、`D/W/H/A/E`、`CIO`（方向不明，归 IO 区）、`MC://_MC_AX[0]`（运动轴，归 IO 区）；西门子 `%I*` 输入、`%Q*` 输出、`%M*` 存储，无地址的标签归内部。
-- **识别博途工程**：不要求文件夹名以 `.ap16/.ap18` 结尾——只要文件夹里有 `<name>.ap16/.ap18` 文件（旁边有 `System/`、`IM/` 等项目结构）就会被识别，并标出版本。点「读取设备与块」会通过 Openness 列出设备和全部程序块（首次会启动后台 TIA，约 20–40 秒）。
+- **识别博途工程**：不要求文件夹名以 `.ap16/.ap18` 结尾——只要文件夹里有 `工程名.ap16` / `工程名.ap18` 文件（旁边有 `System/`、`IM/` 等项目结构）就会被识别，并标出版本。点「读取设备与块」会通过 Openness 列出设备和全部程序块（首次会启动后台 TIA，约 20–40 秒）。
 - **静态校验**：选中 `.smc2` 点「运行校验」，离线检查未声明标识符、重复变量、重复 AT 地址、IF/CASE/FOR/WHILE 块不配平，直接列出 POU 和行号；生成工程时自动跑一次。
 - **ST → Sysmac XML**：把 `.st` 源文件（`TYPE` / `FUNCTION_BLOCK` / `PROGRAM`）转换成 Sysmac Studio 可导入的 **IEC 61131-10 XML**。转换器沿用工作区里已用官方 XSD 校验过的那套实现。
 - **博途 Openness**：用官方 `Siemens.Engineering` 接口列设备/块、导入 SCL 外部源并编译、编译 PLC、导出块 XML、读标签表、读块接口（`readBlocks`：输入/输出/InOut/Static/Temp/Constant 成员，带类型、起始值和注释），以及**删块**（`deleteBlocks`，用于清掉生成失败的块）。`plan` 只生成命令文件不动博途，`run` 才真正连博途。
@@ -39,7 +39,7 @@
 }
 ```
 
-生成后用 `plc_sysmac overview` 复查，或在 Sysmac Studio 里直接打开编译。已实测：改名、换变量表、写 ST 正文、改控制器字符串这四类改动单独和组合都通过；用 11 个 ST POU、25 个变量的中文示例生成的 `.smc2`，在 Sysmac Studio 中打开显示为 `AgentPLC_示例项目示例 - new_Controller_0`。
+生成后用 `plc_sysmac overview` 复查，或在 Sysmac Studio 里直接打开编译。已实测：改名、换变量表、写 ST 正文、改控制器字符串这四类改动单独和组合都通过；用真实工程生成的中文示例也能在 Sysmac Studio 正常打开。
 
 生成后默认自动跑一次**静态校验**（`verify: false` 可关闭），结果写在工具返回里；也可以用 `plc_sysmac` 的 `verify` 动作单独复查。校验不是原厂编译器：它抓的是生成最容易犯的错（未声明变量、重复定义、地址冲突、块不配平）。
 
@@ -188,11 +188,11 @@
 
 - ✅ 支持：ST（结构化文本）程序的读取与生成、全局变量表、程序内 `VAR_EXTERNAL` 同步声明、新增 POU（Program / FunctionBlock）、静态校验、Sysmac 原厂编译（F7 + 重编译）；
 - ❌ 不支持：**IO 分配**（不会自动写入 `AT %IX/%QX` 地址，需在 Sysmac 里手动分配）、**任务设置**（不能新增/修改任务、周期、优先级）、梯形图/SCL 之外的图形化编辑；
-- ❌ 不支持：删除 POU、修改梯形图程序、HMI/轴/IO 硬件配置生成。
+- ❌ 不支持（Sysmac）：删除 POU、修改梯形图程序、HMI/轴/IO 硬件配置生成。TIA 侧可以用 `deleteBlocks` 删除块（用于清理生成失败的块）。
 
 - **`.smc2` 格式是逆向出来的**，不是官方格式。当前实现覆盖：`.oem` 实体树、`.manifest`、ST 主体（`StructuredTextModel`）、SLWD 变量表、梯形图 JSON 梯级。生成用的是「模板 + 替换」而不是从零构造，POU 集合和局部变量表沿用模板。
 - **TIA Openness 已可用**：V16/V18 与 Openness 程序集齐全，用户已加入 `Siemens TIA Openness` 组并重新登录；首次调用 TIA 时若弹出 Openness 访问授权框，选「全部确定」。`.ap16`/`.ap18` 的生成不依赖 TIA 图形界面，但会启动后台 TIA 实例，单次创建约 20–40 秒。
-- **ST 转换需要 Python 3**（本机 `D:\Python\python.exe` 可用）。转换器是 `python/` 下的三个脚本，转换失败会返回完整错误。
+- **ST 转换需要 Python 3**（插件会自动探测本机可用的 Python 3）。转换器是 `python/` 下的三个脚本，转换失败会返回完整错误。
 - **博途工程目录无法离线解析**：`.ap16/.ap18` 是博途自己的工程库，必须走 Openness。
 - 读取全程只读；`export-variables`、`plc_sysmac create`、`plc_st convert`、`plc_tia run` 会写文件或驱动工程。
 
@@ -201,35 +201,35 @@
 已验证（用本机真实工程）：
 
 - 侧栏入口与主面板都注册成功（`sidebar.panellist` 的 `agentplc` 占位、`main` 的 `agentplc` 键都是 active）。
-- 扫描 `<桌面>`、`<文档>`、`<工程目录>`：79 个条目（62 个 `.smc2`、3 个博途工程、14 个 `.st`）。三个博途工程是 `<桌面>\项目1`（V16）、`<工程目录>\\示例项目V18`（V18）、`<工程目录>\\历史程序\\示例项目`（V16）。
-- 博途工程读取：`示例项目V18` 通过面板路由读到 1 个设备（S7-1200 station_1）和 34 个块，耗时 21 秒；`示例项目_弃用` 读到 7 个块（`Main, 气缸块, 点位参数, 夹紧气缸, 夹爪气缸, 升降气缸, 定位气缸`）。
-- 解析真实工程：ST 工程 `main_ST` 738 行、`气缸块_ST` 49 行；梯形图工程 `main` 9 段 82 级、`气缸块` 12 级，变量 353 条 / 4 张表。
+- 扫描目录由用户在面板里添加并持久化（`%APPDATA%\dsh-agentplc\roots.json`），插件不预设任何目录。一次实测：一个根目录列出 62 个工程（47 个 `.smc2`、15 个 TIA），另一个根目录列出 6 个 `.st`。
+- 博途工程读取：一次实测读到 1 个设备（S7-1200 station_1）和 34 个块，耗时约 21 秒；另一个工程读到 7 个块（`Main`、1 个 FB、1 个 GlobalDB、4 个实例 DB）。
+- 解析真实工程：ST 工程 738 行；梯形图工程 9 段 82 级，变量 353 条 / 4 张表。
 - 面板路由：`/state`、`/project`、`/pou`、`/variables.csv`、`/st-source`、`/st-xml` 全部 200，CSV 带 BOM 且中文正常。
 - `plc_st convert` 用 6 个 `.st` 生成 45680 字节 XML（6 个数据类型、5 个功能块、2 个程序），XML 可被标准解析器解析。
-- **`.smc2` 生成链路逐项验证**：以 `<模板工程>.smc2` 为模板，先只重打包（原始内容）→ Sysmac 打开成功；再分别只改名、只换全局变量表、只换 ST 正文、改名+变量+正文组合、改控制器字符串——六个变体全部在 Sysmac Studio 中打开成功。最后用 `plc_sysmac create` 生成 `AgentPLC_输送线示例.smc2`（11 个变量、2 个 POU、中文 ST），Sysmac 窗口标题为 `AgentPLC_输送线示例 - new_Controller_0 - Sysmac Studio (64bit)`。
+- **`.smc2` 生成链路逐项验证**：以真实模板工程为起点，先只重打包（原始内容）→ Sysmac 打开成功；再分别只改名、只换全局变量表、只换 ST 正文、改名+变量+正文组合、改控制器字符串——六个变体全部在 Sysmac Studio 中打开成功。最后用 `plc_sysmac create` 生成的中文示例如 `AgentPLC_输送线示例.smc2`，Sysmac 可直接打开。
 - **静态校验**：故意写坏的工程报 `2 error(s)`（未声明变量A/B，带行号），正常工程报 `0 error(s)`；`plc_sysmac create` 生成时自动校验，坏样例直接返回 `1 error(s) — 未声明标识符 未声明输出（第 2 行）`；面板路由 `/agentplc/api/sysmac/verify` 返回 200 和问题列表。
 - **原厂编译校验**：`plc_sysmac compile` 在提权副本上执行 F7「检查所有程序」+「重编译控制器」（自动确认「所有程序将重新编译，你要继续吗？」→ 是(Y)），从编译窗口读回 `2 error(s), 0 warning(s)` 和两条带 `PRG_Init line 3/4` 的消息；探针实例跑完自动关闭，原工程未改动。
 - `plc_tia plan`（create/list/importScl 等）能按工程后缀选中 V16 或 V18 API 并生成命令文件。
-- **统一 IO 清单**：`真实工程.smc2` 608 个变量 → 6 输入 / 1 输出 / 601 内部（7 个有地址，EtherCAT 输入输出按对象路径分对）；`现场V18工程` 140 个标签 → 84 输入 / 42 输出 / 14 存储，地址全部识别，标签注释从 Openness 的 `MultilingualText` 正确取文本。面板路由 `/agentplc/api/io` 与 `/agentplc/api/io.csv`（UTF-8 BOM + CRLF）实测 200，CSV 51 KB。另在 20 个真实 `.smc2` 工程上抽检 3873 条有地址变量：`%D` 全部归存储，带 `Input`/`Output` 字样的 ECAT / IOBus / BuiltInIO 地址全部归输入/输出，`MC://_MC_AX` 归 IO 区。
+- **统一 IO 清单**：一个真实 `.smc2` 工程 608 个变量 → 6 输入 / 1 输出 / 601 内部（7 个有地址，EtherCAT 输入输出按对象路径分对）；一个现场 V18 工程 140 个标签 → 84 输入 / 42 输出 / 14 存储，地址全部识别，标签注释从 Openness 的 `MultilingualText` 正确取文本。面板路由 `/agentplc/api/io` 与 `/agentplc/api/io.csv`（UTF-8 BOM + CRLF）实测 200，CSV 51 KB。另在 20 个真实 `.smc2` 工程上抽检 3873 条有地址变量：`%D` 全部归存储，带 `Input`/`Output` 字样的 ECAT / IOBus / BuiltInIO 地址全部归输入/输出，`MC://_MC_AX` 归 IO 区。
 - **TIA SCL 导入的真实坑（已修正结论）**：不是中文标识符，而是**文件编码 + 行尾 `//` 注释**：
   - 无 BOM 的 UTF-8 `.scl` 会被 TIA 当 ANSI 读，中文标签名变成乱码（`Tag "鑷姩杩愯鏍囧織" not defined`）；现在每次导入都用 **UTF-8 BOM 临时副本**（原文件不动），实测中文标签引用正常。
   - 行尾 `//` 注释会让 TIA 报 Success 却整块跳过（`FB_Skip_B`），去掉后正常生成并编译；行首注释、`(* *)` 块注释、中文标识符本身都没问题。
   - `plc_tia ... autoFix:true` 在临时副本里额外删除行尾注释，并报告删除条数与被跳过的块。
-- **TIA V18 真实工程 0 错误闭环（现场V18工程 副本）**：`listTags` 读 `140` 个标签；`readBlocks` 读 10/34 个块，含 `模式设定`（FB：Input 12/Output 12/InOut 1/Static 6）、`触摸屏控制`（GlobalDB：32 个成员）、`测试工位气缸自动流程_DB`（实例 DB：31 个成员）。用真实标签 `Clock_10Hz %M0.0` 写两个 FB（`FB_AgentClkEdge` 上升沿计数、`FB_AgentCounter` 累加），导入后两个块均 `Block was successfully compiled`，整机编译 **`0 error(s), 1 warning(s)`**（warning 是工程原有的"使用了硬件组态里不存在的 I/O"），回读接口正确。
+- **TIA V18 真实工程 0 错误闭环（现场工程副本）**：`listTags` 读 `140` 个标签；`readBlocks` 读 10/34 个块，含一个 FB（Input 12/Output 12/InOut 1/Static 6）、一个 GlobalDB（32 个成员）和一个实例 DB（31 个成员）。用真实标签 `Clock_10Hz %M0.0` 写两个 FB（`FB_AgentClkEdge` 上升沿计数、`FB_AgentCounter` 累加），导入后两个块均 `Block was successfully compiled`，整机编译 **`0 error(s), 1 warning(s)`**（warning 是工程原有的"使用了硬件组态里不存在的 I/O"），回读接口正确。
 - **TIA 删块闭环**：坏工程副本编译 `29 error(s)`（`OB_SD` 引用不存在的 DB 成员，错误带块名和行号）；`plc_tia ... operation=deleteBlocks blockPaths=["FB_Broken","OB_SD"]` 删掉两个坏块后，同一次调用内重编译 `Success`，随后单独 compile 也是 `0 error(s), 0 warning(s)`。
-- **TIA 真实工程闭环（项目A.ap16 副本）**：`listTags` 读到 75 个中文标签（`启动 %I0.0`、`自动运行标志 %M100.0`…）；`readBlocks` 读到 7 个块，含 `气缸块` 的 `Input 6/Output 3/InOut 1/Static 4` 和 `点位参数` 的 6 个 DB 成员。写入 SCL 后导入生成 `FB_AgentPlcWatch`（直接引用 `启动/停止/自动运行标志` 三个真实标签）和 `FB_AgentPlcEdge`，两个块均编译 Success，回读接口正确。整个 PLC 编译仍是 Error，但错误被精确归到**工程原有的空 UDT `用户数据类型_1`**（`A structure without components is not allowed. [Interface]`），不是新导入的块——这也验证了错误归属能力。
-- **面板块接口**：`tiaBlocks`（面板 `/agentplc/api/tia/blocks` 与 `plc_tia readBlocks` 共用）实测 `BrokenTest` 的 `Main`（OB）读出 `Input 2`（`Initial_Call`、`Remanence` 带注释）；不一致的块明确提示「先修编译错误再读」。
+- **TIA 真实工程闭环（V16 中文工程副本）**：`listTags` 读到 75 个中文标签（`启动 %I0.0`、`自动运行标志 %M100.0`…）；`readBlocks` 读到 7 个块，含一个 FB 的 `Input 6/Output 3/InOut 1/Static 4` 和一个 GlobalDB 的 6 个成员。写入 SCL 后导入生成 `FB_AgentPlcWatch`（直接引用 `启动/停止/自动运行标志` 三个真实标签）和 `FB_AgentPlcEdge`，两个块均编译 Success，回读接口正确。整个 PLC 编译仍是 Error，但错误被精确归到**工程原有的空 UDT**（`A structure without components is not allowed. [Interface]`），不是新导入的块——这也验证了错误归属能力。
+- **面板块接口**：`tiaBlocks`（面板 `/agentplc/api/tia/blocks` 与 `plc_tia readBlocks` 共用）实测 `Main`（OB）读出 `Input 2`（`Initial_Call`、`Remanence` 带注释）；不一致的块明确提示「先修编译错误再读」。
 - **`.ap18` / `.ap16` 真实生成**：`plc_tia run create` 在本机创建 `AgentPlcDemo.ap18`（V18 API，PLC_1 + 导入 `FB_Conveyor.scl`，编译 `Success`，`list` 读回 `Main, FB_Conveyor`）和 `AgentPlcV16.ap16`（V16 API，PLC_1，编译 `Success`）。
 - `plc_tia run importScl` 对已有工程导入 SCL 并编译，返回 `state: Success` 与编译器消息。
-- **autoFix + 真实闭环**：以真实 `真实工程.smc2` 为模板，新程序 `PRG_CommWatch` 使用全局 `CommOk` 但没声明；`create` 加 `autoFix:true` 自动补 `CommOk:BOOL` 的 `VAR_EXTERNAL`，静态校验 `0 error(s)`，原厂编译 `0 error(s), 0 warning(s)`（`PRG_CommWatch` 未挂任务，任务仍归用户）。顺带修了两处：静态校验曾把 `T#1s` 里的 `s` 误报成未声明标识符；`create` 的输出在扫描目录外（如 `%TEMP%`、文档）时编译会被扫描目录规则挡住。
-- **TIA 编译错误可读**：Openness 的块级消息 `Description` 是空的，但递归子消息带真实错误文本和行号；驱动现在把所属块一路传下去，实测坏工程 `BrokenTest.ap16` 返回 `29 error(s)`，摘要形如 `Error: Tag "DB_SD".Main not defined. [OB_SD (OB123) line 3]`，所以 TIA 也能按真实错误改。
-- **TIA 块接口可读**：Openness 对象模型不暴露块接口，所以 `readBlocks` 先把块导出成 Simatic ML，再由 Host 解析 `<Interface><Sections>`；实测 `BrokenTest` 的 `Main`（OB）读出 `Input 2: Initial_Call, Remanence`（含注释），解析器在真实导出上覆盖 FB/FC/OB 的 Input/Output/InOut/Static/Temp/Constant。**不一致（有编译错误）的块 TIA 拒绝导出**，这时会明确返回「先修错误再读」，不会给空接口。
-- **内置示例模板**：`plc_sysmac create` 可直接以 `examples/AgentPLC_Demo.smc2` 为模板（不需要把它加进扫描目录），生成的 `PRG_Example` 挂在 `PrimaryTask`，静态校验 `0 error(s)`；面板「新建工程」的模板下拉里也能选到「内置示例」，不填输出路径时写到「文档」目录。
-- **ST 转换（本机真实文件）**：`案例工程\01_类型定义.st` 转出 6 个数据类型；面板路由 `/st-source`、`/st-xml`（IEC 61131-10）与 `/st-xml&format=plcopen` 均返回 200，中文路径正常。
+- **autoFix + 真实闭环**：以真实 `.smc2` 工程为模板，新程序 `PRG_CommWatch` 使用全局 `CommOk` 但没声明；`create` 加 `autoFix:true` 自动补 `CommOk:BOOL` 的 `VAR_EXTERNAL`，静态校验 `0 error(s)`，原厂编译 `0 error(s), 0 warning(s)`（`PRG_CommWatch` 未挂任务，任务仍归用户）。顺带修了两处：静态校验曾把 `T#1s` 里的 `s` 误报成未声明标识符；`create` 的输出在扫描目录外（如 `%TEMP%`、文档）时编译会被扫描目录规则挡住。
+- **TIA 编译错误可读**：Openness 的块级消息 `Description` 是空的，但递归子消息带真实错误文本和行号；驱动现在把所属块一路传下去，实测一个坏工程返回 `29 error(s)`，摘要形如 `Error: Tag "DB_SD".Main not defined. [OB_SD (OB123) line 3]`，所以 TIA 也能按真实错误改。
+- **TIA 块接口可读**：Openness 对象模型不暴露块接口，所以 `readBlocks` 先把块导出成 Simatic ML，再由 Host 解析 `<Interface><Sections>`；实测一个 OB 样例读出 `Input 2: Initial_Call, Remanence`（含注释），解析器在真实导出上覆盖 FB/FC/OB 的 Input/Output/InOut/Static/Temp/Constant。**不一致（有编译错误）的块 TIA 拒绝导出**，这时会明确返回「先修错误再读」，不会给空接口。
+- **内置示例模板**：`plc_sysmac create` 可直接以 `examples/AgentPLC_Demo.smc2` 为模板（不需要把它加进扫描目录），生成的 `PRG_Example` **默认不挂任务**（任务由你在 Sysmac 里分配），静态校验 `0 error(s)`；面板「新建工程」的模板下拉里也能选到「内置示例」，不填输出路径时写到「文档」目录。
+- **ST 转换（本机真实文件）**：一个真实 `.st` 源文件转出 6 个数据类型；面板路由 `/st-source`、`/st-xml`（IEC 61131-10）与 `/st-xml&format=plcopen` 均返回 200，中文路径正常。
 
 未验证（环境或权限不具备）：
 
-- 面板的**实际渲染**：本会话没有浏览器控制，只做了代码级 UI 复核（已按复核意见修掉死路重试、截断说明、下载错误处理、加载态误报、无障碍标签等问题），没有截图。
+- 面板的**自动化视觉验证**：没有浏览器控制/截图脚本，只做代码级复核与用户实际使用（扫描目录、浏览、工程详情均已人工确认）。**块接口区**、暗色主题、窄窗口布局仍建议肉眼过一遍。
 - **原厂编译每次要一次 UAC**：Sysmac Studio 以管理员权限运行，助手必须提权才能读它的窗口；`plc_sysmac compile` 每次会弹一次 UAC，确认后跑 F7 + 重编译，约 1–2 分钟。
 - **编译窗口是自绘界面**：错误行靠 UIA 文本读取（实测能拿到消息、POU、行列），截图 + OCR 仅作兜底；如果某天 OMRON 改版导致 UIA 文本变化，OCR 结果可能不完整。
 - **Sysmac Studio 编译生成工程**：生成的 `.smc2` 已确认能在 Sysmac 里打开；也可以直接用 `plc_sysmac compile` 跑原厂编译取证（生成工程里未替换的 POU 可能引用旧变量，编译会如实报出来）。
