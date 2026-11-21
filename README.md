@@ -214,6 +214,8 @@
 - **非 ASCII SCL 预警**：`plc_tia plan` 发现源文件代码里（注释和字符串除外）有中文标识符时会先给出警告，避免「返回 Success 但块没生成」；纯中文注释不误报（`FB_StarDelta_EN.scl` 不报，`FB_StarDelta.scl` 报）。
 - **`.ap18` / `.ap16` 真实生成**：`plc_tia run create` 在本机创建 `AgentPlcDemo.ap18`（V18 API，PLC_1 + 导入 `FB_Conveyor.scl`，编译 `Success`，`list` 读回 `Main, FB_Conveyor`）和 `AgentPlcV16.ap16`（V16 API，PLC_1，编译 `Success`）。
 - `plc_tia run importScl` 对已有工程导入 SCL 并编译，返回 `state: Success` 与编译器消息。
+- **内置示例模板**：`plc_sysmac create` 可直接以 `examples/AgentPLC_Demo.smc2` 为模板（不需要把它加进扫描目录），生成的 `PRG_Example` 挂在 `PrimaryTask`，静态校验 `0 error(s)`；面板「新建工程」的模板下拉里也能选到「内置示例」，不填输出路径时写到「文档」目录。
+- **ST 转换（本机真实文件）**：`案例工程\01_类型定义.st` 转出 6 个数据类型；面板路由 `/st-source`、`/st-xml`（IEC 61131-10）与 `/st-xml&format=plcopen` 均返回 200，中文路径正常。
 
 未验证（环境或权限不具备）：
 
