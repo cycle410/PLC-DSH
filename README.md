@@ -180,7 +180,7 @@
 
 面板里添加的目录会存到 `%APPDATA%\dsh-agentplc\roots.json`，和上面的 `projectRoots` 合并生效；删除某个目录后，它下面的工程会立刻从列表消失。插件**不预设** Documents / Desktop。
 
-面板只展示**扫描目录内**的工程；`plc_sysmac` / `plc_st` 也只接受这些目录内的路径，避免面板变成任意文件读取入口。
+面板只展示**扫描目录内**的工程；`plc_sysmac` 读写工程也要求路径在扫描目录内（唯一例外是随插件附带的 `examples/AgentPLC_Demo.smc2` 模板）。`plc_st convert` 的输入是任意 `.st` 源码路径，`plc_tia` 的工程路径由 Openness 直接打开，这两者不受扫描目录限制。
 
 ## 前提与已知限制
 

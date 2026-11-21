@@ -40,6 +40,7 @@ window.__ModuleLoader__.load({
         'list.emptyFiltered': '没有匹配的工程',
         'list.generatedAt': '扫描于 {time}',
         'list.emptyHint': '把 .smc2、TIA 工程目录或 .st 源文件放到扫描目录下，然后刷新。',
+        'list.emptyNoRoots': '还没有扫描目录：点上方「添加文件夹」输入路径，或用「浏览…」选一个工程目录。',
         'list.roots': '扫描 {n} 个目录',
         'list.truncated': '扫描达到上限，结果可能不完整',
         'list.counts': '{sysmac} 个 .smc2 · {tia} 个博途 · {st} 个 .st',
@@ -83,6 +84,7 @@ window.__ModuleLoader__.load({
         'roots.add': '添加文件夹',
         'roots.browse': '浏览…',
         'roots.addFailed': '添加失败：{error}',
+        'roots.removeFailed': '移除失败：{error}',
         'roots.pickUnavailable': '读不到所选文件夹的路径（当前外壳不支持），请把完整路径粘贴到输入框再点「添加文件夹」。',
         'roots.remove': '移除该扫描目录',
         'roots.list': '扫描目录 ({n})',
@@ -98,10 +100,16 @@ window.__ModuleLoader__.load({
         'create.pouName': '新增 POU 名称（可选）',
         'create.pouBody': 'ST 正文',
         'create.compile': '生成后原厂编译（需 UAC）',
+        'create.overwrite': '覆盖同名文件',
         'create.submit': '生成',
         'create.cancel': '取消',
         'create.running': '生成中…',
         'create.success': '已生成：{path}',
+        'create.verify': '静态校验：{errors} 个错误 · {warnings} 个警告',
+        'create.compileResult': '原厂编译：{errors} 个错误 · {warnings} 个警告',
+        'create.newPous': '新增 POU：{names}',
+        'create.backup': '原文件已备份到 {path}',
+        'create.outsideRoots': '工程已生成，但它不在扫描目录里：把所在文件夹加入扫描目录后，才能在面板左侧看到并打开。',
         'create.error': '生成失败：{error}',
         'create.modeReplace': '替换',
         'create.modeMerge': '合并',
@@ -161,6 +169,7 @@ window.__ModuleLoader__.load({
         'io.name': '名称',
         'io.address': '地址',
         'io.type': '类型',
+        'io.comment': '注释',
         'io.table': '变量表',
         'io.csv': '导出 IO CSV',
         'io.rows': '{shown} / {total} 行',
@@ -170,6 +179,13 @@ window.__ModuleLoader__.load({
         'copy.sysmac': '用 plc_sysmac 读取工程「{path}」：先给控制器、POU 和变量表概览，再用 plc_io 看已有地址。改程序时把 ST 正文给我，用 create 生成工程并加 compile:true 跑原厂编译；全局变量只放普通类型，TON 放程序内 VAR，程序里用到的全局变量要写 VAR_EXTERNAL。',
         'copy.tia': '用 plc_tia 打开博途工程「{path}」：先用 action=plan、operation=list 生成并审查命令，确认后用 action=run、operation=list 列出设备和 PLC 块；要读标签表就用 operation=listTags。',
         'download.failed': '下载失败：{error}',
+        'download.busy': '正在下载…',
+        'handoff.title': '交给 Agent',
+        'handoff.show': '查看提示词',
+        'handoff.hide': '收起',
+        'handoff.copy': '复制提示词',
+        'handoff.hint': '把提示词粘贴到对话里发送：Agent 会先读这个工程、给出方案，等你确认后再写程序和编译。',
+        'copy.st': '用 plc_st 把「{path}」转成 Sysmac 可导入的 IEC 61131-10 XML；如果转换失败，把完整错误给我，并说明怎么改。',
         'error.prefix': '读取失败：{error}',
       },
       en: {
@@ -206,6 +222,7 @@ window.__ModuleLoader__.load({
         'list.emptyFiltered': 'No project matches this filter',
         'list.generatedAt': 'Scanned {time}',
         'list.emptyHint': 'Place .smc2, TIA project folders, or .st sources under a scanned folder, then refresh.',
+        'list.emptyNoRoots': 'No scanned folder yet: use "Add folder" above or pick a project folder with "Browse…".',
         'list.roots': '{n} scanned folders',
         'list.truncated': 'Scan hit its limit; results may be incomplete',
         'list.counts': '{sysmac} .smc2 · {tia} TIA · {st} .st',
@@ -249,6 +266,7 @@ window.__ModuleLoader__.load({
         'roots.add': 'Add folder',
         'roots.browse': 'Browse…',
         'roots.addFailed': 'Could not add the folder: {error}',
+        'roots.removeFailed': 'Could not remove the folder: {error}',
         'roots.pickUnavailable': 'This shell does not expose the selected folder path; paste the full path into the box and press "Add folder".',
         'roots.remove': 'Remove this root',
         'roots.list': 'Scanned folders ({n})',
@@ -264,10 +282,16 @@ window.__ModuleLoader__.load({
         'create.pouName': 'New POU name (optional)',
         'create.pouBody': 'ST body',
         'create.compile': 'Run vendor compile after creating (needs UAC)',
+        'create.overwrite': 'Overwrite an existing file',
         'create.submit': 'Create',
         'create.cancel': 'Cancel',
         'create.running': 'Creating…',
         'create.success': 'Created: {path}',
+        'create.verify': 'Static check: {errors} error(s) · {warnings} warning(s)',
+        'create.compileResult': 'Vendor compile: {errors} error(s) · {warnings} warning(s)',
+        'create.newPous': 'New POUs: {names}',
+        'create.backup': 'Previous file backed up to {path}',
+        'create.outsideRoots': 'The project is built, but it is outside the scan roots. Add its folder as a scan root to see and open it in this panel.',
         'create.error': 'Create failed: {error}',
         'create.modeReplace': 'Replace',
         'create.modeMerge': 'Merge',
@@ -327,6 +351,7 @@ window.__ModuleLoader__.load({
         'io.name': 'Name',
         'io.address': 'Address',
         'io.type': 'Type',
+        'io.comment': 'Comment',
         'io.table': 'Table',
         'io.csv': 'Export IO CSV',
         'io.rows': '{shown} / {total} rows',
@@ -336,6 +361,13 @@ window.__ModuleLoader__.load({
         'copy.sysmac': 'Use plc_sysmac to read the project "{path}": summarise the controller, POUs and variable tables first, then plc_io for the existing addresses. When the program must change, give me the ST body and use create with compile:true for a vendor compile; globals hold ordinary types only, TON instances go in the POU VAR, and every global a program uses needs a VAR_EXTERNAL mirror.',
         'copy.tia': 'Use plc_tia on the TIA project "{path}": first action=plan, operation=list to generate and review the command, then action=run, operation=list to list devices and PLC blocks; operation=listTags reads the tag tables.',
         'download.failed': 'Download failed: {error}',
+        'download.busy': 'Downloading…',
+        'handoff.title': 'Hand to the agent',
+        'handoff.show': 'Show prompt',
+        'handoff.hide': 'Hide',
+        'handoff.copy': 'Copy prompt',
+        'handoff.hint': 'Paste the prompt into the conversation: the agent reads this project, proposes an approach, and only after you approve writes and compiles the program.',
+        'copy.st': 'Use plc_st to convert "{path}" to Sysmac-importable IEC 61131-10 XML; if conversion fails, show me the full converter error and how to fix it.',
         'error.prefix': 'Read failed: {error}',
       },
     }
@@ -565,8 +597,7 @@ window.__ModuleLoader__.load({
   background: color-mix(in srgb, var(--dsw-alias-brand-primary) 12%, var(--dsw-alias-bg-base));
   color: var(--dsw-alias-label-primary);
 }
-.ap-io-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
-.ap-io-counts { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.ap-io-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }.ap-io-counts { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 .ap-io-tools { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .ap-dir {
   display: inline-block; white-space: nowrap;
@@ -577,6 +608,7 @@ window.__ModuleLoader__.load({
 .ap-dir.input, .ap-dir.output { color: var(--dsw-alias-label-primary); }
 .ap-io-addr { font-family: var(--ap-mono); font-size: 10.5px; color: var(--dsw-alias-label-secondary); max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ap-io-table-name { font-size: 11px; color: var(--dsw-alias-label-secondary); }
+.ap-io-comment { max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11.5px; color: var(--dsw-alias-label-secondary); }
 .ap-note {
   border: 1px solid var(--dsw-alias-border-l1);
   border-left: 3px solid var(--dsw-alias-state-warn-primary);
@@ -624,6 +656,28 @@ window.__ModuleLoader__.load({
 }
 .ap-field textarea { min-height: 110px; resize: vertical; }
 .ap-modal-actions { display: flex; justify-content: flex-end; gap: 8px; }
+.ap-create-result {
+  display: flex; flex-direction: column; gap: 4px;
+  max-height: 26vh; overflow: auto;
+  padding: 8px 10px; border-radius: 8px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  background: var(--dsw-alias-bg-layer-2);
+}
+.ap-handoff {
+  display: flex; flex-direction: column; gap: 6px;
+  padding: 8px 11px; border-radius: 9px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  background: var(--dsw-alias-bg-layer-2);
+}
+.ap-handoff-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.ap-handoff-actions { display: flex; gap: 8px; }
+.ap-prompt {
+  width: 100%; resize: vertical;
+  font-family: var(--ap-mono); font-size: 11px; line-height: 1.55;
+  padding: 8px; border-radius: 6px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  background: var(--dsw-alias-bg-base); color: var(--dsw-alias-label-primary);
+}
 .ap-check { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--dsw-alias-label-secondary); }
 .ap-btn.primary {
   border-color: color-mix(in srgb, var(--dsw-alias-brand-primary) 55%, transparent);
@@ -927,23 +981,29 @@ window.__ModuleLoader__.load({
         item(
           sysmac?.installed ? 'ok' : 'warn',
           t('card.sysmac'),
-          checking ? t('card.checking') : sysmac?.installed ? t('card.installed') : t('card.notInstalled'),
+          checking
+            ? t('card.checking')
+            : sysmac?.installed
+              ? t('card.installed')
+              : `${t('card.notInstalled')} · ${t('card.offline')}`,
         ),
         item(
-          tia?.opennessReady ? 'ok' : tia?.installed ? 'warn' : '',
+          tia?.automationReady ? 'ok' : tia?.installed ? 'warn' : '',
           t('card.tia'),
           checking
             ? t('card.checking')
-            : tia?.installed
-              ? tia.opennessReady
-                ? `${(tia.installs ?? []).map((install) => install.version).join(' / ') || tia.latest} · ${t('card.opennessReady')}`
-                : t('card.opennessMissing')
-              : t('card.notInstalled'),
+            : !tia?.installed
+              ? t('card.notInstalled')
+              : !tia.opennessReady
+                ? t('card.opennessMissing')
+                : `${(tia.installs ?? []).map((install) => install.version).join(' / ') || tia.latest || ''} · ${
+                    tia.userInOpennessGroup === true ? t('card.member') : tia.userInOpennessGroup === false ? t('card.notMember') : t('card.opennessReady')
+                  }`,
         ),
         item(
-          converter?.ready && converter?.python ? 'ok' : 'warn',
+          converter?.ready ? 'ok' : 'warn',
           t('card.st'),
-          checking ? t('card.checking') : converter?.python ? t('card.converterReady', { python: converter.python }) : t('card.converterMissing'),
+          checking ? t('card.checking') : converter?.ready ? t('card.converterReady', { python: converter.python }) : t('card.converterMissing'),
         ),
         h(
           'div',
@@ -993,7 +1053,13 @@ window.__ModuleLoader__.load({
                   'div',
                   { className: 'ap-list-note' },
                   h('div', { className: 'ap-hint' }, query ? t('list.emptyFiltered') : t('list.empty')),
-                  query ? null : h('div', { className: 'ap-hint' }, t('list.emptyHint')),
+                  query
+                    ? null
+                    : h(
+                        'div',
+                        { className: 'ap-hint' },
+                        (data?.roots ?? []).length === 0 ? t('list.emptyNoRoots') : t('list.emptyHint'),
+                      ),
                 )
               : projects.map((project) =>
                   h(
@@ -1087,6 +1153,39 @@ window.__ModuleLoader__.load({
       )
     }
 
+    function AgentHandoff({ text, t }) {
+      const [open, setOpen] = React.useState(false)
+      return h(
+        'div',
+        { className: 'ap-handoff' },
+        h(
+          'div',
+          { className: 'ap-handoff-head' },
+          h('span', { className: 'ap-section-title' }, t('handoff.title')),
+          h(
+            'div',
+            { className: 'ap-handoff-actions' },
+            h(
+              'button',
+              { type: 'button', className: 'ap-btn', 'aria-expanded': open, onClick: () => setOpen((value) => !value) },
+              open ? t('handoff.hide') : t('handoff.show'),
+            ),
+            h(CopyButton, { text, label: t('handoff.copy'), t }),
+          ),
+        ),
+        open
+          ? h('textarea', {
+              className: 'ap-prompt',
+              readOnly: true,
+              rows: 6,
+              value: text,
+              'aria-label': t('handoff.title'),
+              onFocus: (event) => event.target.select(),
+            })
+          : h('div', { className: 'ap-hint' }, t('handoff.hint')),
+      )
+    }
+
     function DownloadButton({ url, fileName, label, t, className }) {
       const [state, setState] = React.useState({ busy: false, error: null })
       return h(
@@ -1108,7 +1207,7 @@ window.__ModuleLoader__.load({
               }
             },
           },
-          state.busy ? t('st.converting') : label,
+          state.busy ? t('download.busy') : label,
         ),
         state.error ? h('div', { className: 'ap-error' }, t('download.failed', { error: state.error })) : null,
       )
@@ -1228,7 +1327,7 @@ window.__ModuleLoader__.load({
       )
     }
 
-    function PouViewer({ projectPath, pou, t }) {
+    function PouViewer({ projectPath, pou, t, revision }) {
       const [body, setBody] = React.useState({ loading: false, data: null, error: null })
       React.useEffect(() => {
         if (!pou) return undefined
@@ -1242,7 +1341,7 @@ window.__ModuleLoader__.load({
             setBody({ loading: false, data: null, error: error.message })
           })
         return () => controller.abort()
-      }, [projectPath, pou?.name])
+      }, [projectPath, pou?.name, revision])
       if (body.loading) return h('div', { className: 'ap-spinner' }, t('loading'))
       if (body.error) return h('div', { className: 'ap-error' }, t('error.prefix', { error: body.error }))
       if (!body.data) return null
@@ -1322,7 +1421,7 @@ window.__ModuleLoader__.load({
       )
     }
 
-    function SysmacDetail({ project, t }) {
+    function SysmacDetail({ project, t, revision }) {
       const [tab, setTab] = React.useState('overview')
       const [query, setQuery] = React.useState('')
       const [selectedPou, setSelectedPou] = React.useState(null)
@@ -1347,12 +1446,8 @@ window.__ModuleLoader__.load({
             label: t('variables.download'),
             t,
           }),
-          h(CopyButton, {
-            text: t('copy.sysmac', { path: project.path }),
-            label: t('copy'),
-            t,
-          }),
         ),
+        h(AgentHandoff, { text: t('copy.sysmac', { path: project.path }), t }),
         h(VerifyPanel, { projectPath: project.path, t }),
         h(MetaGrid, {
           cells: [
@@ -1365,11 +1460,10 @@ window.__ModuleLoader__.load({
             { label: t('meta.modified'), value: formatDate(project.modifiedAt) },
           ],
         }),
-        h(IoPanel, { project, t }),
         h(
           'div',
           { className: 'ap-tabs', role: 'tablist' },
-          ['overview', 'variables', 'programs'].map((key) =>
+          ['overview', 'variables', 'programs', 'io'].map((key) =>
             h(
               'button',
               {
@@ -1380,7 +1474,13 @@ window.__ModuleLoader__.load({
                 className: `ap-tab${tab === key ? ' active' : ''}`,
                 onClick: () => setTab(key),
               },
-              key === 'variables' ? `${t('tab.variables')} ${project.variableCount ?? ''}`.trim() : key === 'programs' ? `${t('tab.programs')} ${pouRows.length}`.trim() : t('tab.overview'),
+              key === 'variables'
+                ? `${t('tab.variables')} ${project.variableCount ?? ''}`.trim()
+                : key === 'programs'
+                  ? `${t('tab.programs')} ${pouRows.length}`.trim()
+                  : key === 'io'
+                    ? t('io.title')
+                    : t('tab.overview'),
             ),
           ),
         ),
@@ -1480,13 +1580,14 @@ window.__ModuleLoader__.load({
                       ),
                     ),
                   ),
-              selectedPou ? h(PouViewer, { projectPath: project.path, pou: selectedPou, t }) : h('div', { className: 'ap-hint' }, t('programs.hint')),
+              selectedPou ? h(PouViewer, { projectPath: project.path, pou: selectedPou, t, revision }) : h('div', { className: 'ap-hint' }, t('programs.hint')),
             )
           : null,
+        tab === 'io' ? h(IoPanel, { project, t, revision }) : null,
       )
     }
 
-    function StDetail({ project, t }) {
+    function StDetail({ project, t, revision }) {
       const [source, setSource] = React.useState({ loading: true, text: '', error: null })
       React.useEffect(() => {
         const controller = new AbortController()
@@ -1498,7 +1599,7 @@ window.__ModuleLoader__.load({
             setSource({ loading: false, text: '', error: error.message })
           })
         return () => controller.abort()
-      }, [project.path])
+      }, [project.path, revision])
       return h(
         React.Fragment,
         null,
@@ -1519,6 +1620,7 @@ window.__ModuleLoader__.load({
             t,
           }),
         ),
+        h(AgentHandoff, { text: t('copy.st', { path: project.path }), t }),
         h('div', { className: 'ap-hint' }, t('st.formatHint')),
         h(MetaGrid, {
           cells: [
@@ -1543,13 +1645,12 @@ window.__ModuleLoader__.load({
             : h(
                 React.Fragment,
                 null,
-                project.sourceTruncated ? h('div', { className: 'ap-note' }, t('st.sourceTruncated', { n: 12000 })) : null,
                 h('pre', { className: 'ap-code' }, source.text),
               ),
       )
     }
 
-    function TiaDetail({ project, t }) {
+    function TiaDetail({ project, t, revision }) {
       const [state, setState] = React.useState({ loading: false, data: null, error: null })
       const readDevices = async () => {
         setState({ loading: true, data: null, error: null })
@@ -1583,7 +1684,8 @@ window.__ModuleLoader__.load({
           ],
         }),
         h('div', { className: 'ap-note' }, t('tia.noteLocal')),
-        h(IoPanel, { project, t }),
+        h(AgentHandoff, { text: t('copy.tia', { path: project.path }), t }),
+        h(IoPanel, { project, t, revision }),
         h(
           'div',
           { className: 'ap-actions' },
@@ -1592,11 +1694,6 @@ window.__ModuleLoader__.load({
             { type: 'button', className: 'ap-btn primary', onClick: readDevices, disabled: state.loading },
             state.loading ? t('tia.reading') : t('tia.readDevices'),
           ),
-          h(CopyButton, {
-            text: t('copy.tia', { path: project.path }),
-            label: t('tia.plan'),
-            t,
-          }),
         ),
         state.error ? h('div', { className: 'ap-error' }, t('error.prefix', { error: state.error })) : null,
         devices.map((device) => {
@@ -1658,6 +1755,7 @@ window.__ModuleLoader__.load({
               h('th', null, t('io.name')),
               h('th', null, t('io.address')),
               h('th', null, t('io.type')),
+              h('th', null, t('io.comment')),
               h('th', null, t('io.table')),
             ),
           ),
@@ -1672,6 +1770,7 @@ window.__ModuleLoader__.load({
                 h('td', null, row.name),
                 h('td', { className: 'ap-io-addr', title: row.address || undefined }, row.address || '—'),
                 h('td', { className: 'mono' }, row.dataType || '—'),
+                h('td', { className: 'ap-io-comment', title: row.comment || undefined }, row.comment || '—'),
                 h('td', { className: 'ap-io-table-name' }, row.table),
               ),
             ),
@@ -1680,13 +1779,18 @@ window.__ModuleLoader__.load({
       )
     }
 
-    function IoPanel({ project, t }) {
+    function IoPanel({ project, t, revision }) {
       const [state, setState] = React.useState({ loading: false, inventory: null, error: null })
       const [direction, setDirection] = React.useState('')
       const [query, setQuery] = React.useState('')
 
+      // A new revision means the project may have changed on disk: drop the cached view.
+      React.useEffect(() => {
+        setState({ loading: false, inventory: null, error: null })
+      }, [revision])
+
       const load = async () => {
-        setState({ loading: true, inventory: null, error: null })
+        setState((current) => ({ loading: true, inventory: current.inventory, error: null }))
         try {
           const response = await fetch(`/agentplc/api/io?path=${encodeURIComponent(project.path)}&fresh=1`, {
             credentials: 'same-origin',
@@ -1699,10 +1803,11 @@ window.__ModuleLoader__.load({
           } catch {
             payload = { ok: false, error: text.slice(0, 200) || `HTTP ${response.status}` }
           }
-          if (!response.ok || !payload.ok) setState({ loading: false, inventory: null, error: payload.error ?? `HTTP ${response.status}` })
+          if (!response.ok || !payload.ok)
+            setState((current) => ({ loading: false, inventory: current.inventory, error: payload.error ?? `HTTP ${response.status}` }))
           else setState({ loading: false, inventory: payload.inventory, error: null })
         } catch (error) {
-          setState({ loading: false, inventory: null, error: error?.message ?? String(error) })
+          setState((current) => ({ loading: false, inventory: current.inventory, error: error?.message ?? String(error) }))
         }
       }
 
@@ -1722,7 +1827,7 @@ window.__ModuleLoader__.load({
 
       return h(
         'div',
-        { className: 'ap-section' },
+        { className: 'ap-section', 'aria-busy': state.loading ? 'true' : undefined },
         h(
           'div',
           { className: 'ap-io-head' },
@@ -1800,7 +1905,7 @@ window.__ModuleLoader__.load({
       )
     }
 
-    function ProjectDetail({ detail, t }) {
+    function ProjectDetail({ detail, t, revision }) {
       return h(
         'section',
         { className: 'ap-detail' },
@@ -1815,13 +1920,13 @@ window.__ModuleLoader__.load({
           ),
           h('div', { className: 'ap-path' }, detail.path),
         ),
-        detail.kind === 'sysmac' ? h(SysmacDetail, { key: detail.path, project: detail, t }) : null,
-        detail.kind === 'st' ? h(StDetail, { key: detail.path, project: detail, t }) : null,
-        detail.kind === 'tia' ? h(TiaDetail, { key: detail.path, project: detail, t }) : null,
+        detail.kind === 'sysmac' ? h(SysmacDetail, { key: detail.path, project: detail, t, revision }) : null,
+        detail.kind === 'st' ? h(StDetail, { key: detail.path, project: detail, t, revision }) : null,
+        detail.kind === 'tia' ? h(TiaDetail, { key: detail.path, project: detail, t, revision }) : null,
       )
     }
 
-    function CreateDialog({ t, projects, onClose, onCreated }) {
+    function CreateDialog({ t, projects, roots, onClose, onCreated }) {
       const scanned = React.useMemo(() => (projects ?? []).filter((project) => project.kind === 'sysmac'), [projects])
       const [examples, setExamples] = React.useState([])
       const [template, setTemplate] = React.useState('')
@@ -1846,18 +1951,34 @@ window.__ModuleLoader__.load({
       const [pouName, setPouName] = React.useState('')
       const [pouBody, setPouBody] = React.useState('IF P_First_Run THEN\n    RETURN;\nEND_IF;')
       const [compile, setCompile] = React.useState(false)
-      const [status, setStatus] = React.useState({ running: false, error: null, ok: null })
+      const [overwrite, setOverwrite] = React.useState(false)
+      const [status, setStatus] = React.useState({ running: false, error: null, result: null })
+
+      const isUnderRoots = (value) => {
+        const target = String(value ?? '').toLowerCase()
+        return (roots ?? []).some((root) => {
+          const base = String(root).toLowerCase().replace(/[\\/]+$/, '')
+          return base !== '' && (target === base || target.startsWith(`${base}\\`) || target.startsWith(`${base}/`))
+        })
+      }
 
       const close = () => {
         if (!status.running) onClose()
       }
+      React.useEffect(() => {
+        const onKeyDown = (event) => {
+          if (event.key === 'Escape' && !status.running) onClose()
+        }
+        window.addEventListener('keydown', onKeyDown)
+        return () => window.removeEventListener('keydown', onKeyDown)
+      }, [status.running, onClose])
       const submit = async () => {
         if (!template) {
-          setStatus({ running: false, error: 'template missing', ok: null })
+          setStatus({ running: false, error: 'template missing', result: null })
           return
         }
-        setStatus({ running: true, error: null, ok: null })
-        const params = new URLSearchParams({ template, projectName, variablesMode, compile: String(compile) })
+        setStatus({ running: true, error: null, result: null })
+        const params = new URLSearchParams({ template, projectName, variablesMode, compile: String(compile), overwrite: String(overwrite) })
         if (output.trim()) params.set('output', output.trim())
         if (pouName.trim()) {
           params.set('newPous', JSON.stringify([{ name: pouName.trim(), stText: pouBody }]))
@@ -1870,13 +1991,13 @@ window.__ModuleLoader__.load({
           })
           const payload = await response.json()
           if (!response.ok || !payload.ok) {
-            setStatus({ running: false, error: payload.error ?? `HTTP ${response.status}`, ok: null })
+            setStatus({ running: false, error: payload.error ?? `HTTP ${response.status}`, result: null })
             return
           }
-          setStatus({ running: false, error: null, ok: payload.path })
+          setStatus({ running: false, error: null, result: payload })
           onCreated(payload.path)
         } catch (error) {
-          setStatus({ running: false, error: error?.message ?? String(error), ok: null })
+          setStatus({ running: false, error: error?.message ?? String(error), result: null })
         }
       }
 
@@ -1884,6 +2005,9 @@ window.__ModuleLoader__.load({
         'div',
         {
           className: 'ap-modal',
+          role: 'dialog',
+          'aria-modal': 'true',
+          'aria-label': t('create.title'),
           onMouseDown: (event) => {
             if (event.target === event.currentTarget) close()
           },
@@ -1942,8 +2066,44 @@ window.__ModuleLoader__.load({
             h('input', { type: 'checkbox', checked: compile, onChange: (event) => setCompile(event.target.checked) }),
             t('create.compile'),
           ),
+          h(
+            'label',
+            { className: 'ap-check' },
+            h('input', { type: 'checkbox', checked: overwrite, onChange: (event) => setOverwrite(event.target.checked) }),
+            t('create.overwrite'),
+          ),
           status.error ? h('div', { className: 'ap-error' }, t('create.error', { error: status.error })) : null,
-          status.ok ? h('div', { className: 'ap-hint' }, t('create.success', { path: status.ok })) : null,
+          status.result
+            ? h(
+                'div',
+                { className: 'ap-create-result' },
+                h('div', { className: 'ap-hint' }, t('create.success', { path: status.result.path })),
+                h(
+                  'div',
+                  { className: 'ap-hint' },
+                  t('create.verify', { errors: status.result.verificationErrors ?? 0, warnings: status.result.verificationWarnings ?? 0 }),
+                ),
+                status.result.compile
+                  ? h(
+                      'div',
+                      { className: status.result.compile.ok ? 'ap-hint' : 'ap-error' },
+                      t('create.compileResult', {
+                        errors: status.result.compile.errorCount ?? '?',
+                        warnings: status.result.compile.warningCount ?? '?',
+                      }),
+                    )
+                  : null,
+                status.result.newPous?.length
+                  ? h(
+                      'div',
+                      { className: 'ap-hint' },
+                      t('create.newPous', { names: status.result.newPous.map((pou) => `${pou.name}${pou.task ? ` · ${pou.task}` : ''}`).join(', ') }),
+                    )
+                  : null,
+                status.result.backupPath ? h('div', { className: 'ap-hint' }, t('create.backup', { path: status.result.backupPath })) : null,
+                !isUnderRoots(status.result.path) ? h('div', { className: 'ap-note' }, t('create.outsideRoots')) : null,
+              )
+            : null,
           h(
             'div',
             { className: 'ap-modal-actions' },
@@ -2113,11 +2273,10 @@ window.__ModuleLoader__.load({
           ? h(CreateDialog, {
               t,
               projects: state.data?.projects,
+              roots: state.data?.roots,
               onClose: () => setCreateOpen(false),
-              onCreated: (path) => {
-                setCreateOpen(false)
+              onCreated: () => {
                 setRefreshToken((value) => value + 1)
-                if (path) setSelectedPath(path)
               },
             })
           : null,
@@ -2222,14 +2381,30 @@ window.__ModuleLoader__.load({
                           className: 'ap-btn',
                           disabled: selectedRoots.length === 0,
                           onClick: async () => {
+                            const removed = []
+                            let failure = null
                             for (const root of selectedRoots) {
-                              await fetch(`/agentplc/api/roots?action=remove&path64=${encodeURIComponent(encodePath64(root))}`, {
-                                credentials: 'same-origin',
-                              })
+                              try {
+                                const response = await fetch(
+                                  `/agentplc/api/roots?action=remove&path64=${encodeURIComponent(encodePath64(root))}`,
+                                  { credentials: 'same-origin', headers: { accept: 'application/json' } },
+                                )
+                                const payload = await response.json().catch(() => ({}))
+                                if (!response.ok || payload.ok === false) failure = payload.error ?? `HTTP ${response.status}`
+                                else removed.push(root)
+                              } catch (error) {
+                                failure = error?.message ?? String(error)
+                              }
                             }
+                            setRootError(failure ? t('roots.removeFailed', { error: failure }) : null)
                             setSelectedRoots([])
                             setRootsOpen(false)
                             setRefreshToken((value) => value + 1)
+                            if (removed.length > 0) {
+                              setSelectedPath((current) =>
+                                current && removed.some((root) => current.toLowerCase().startsWith(root.toLowerCase())) ? null : current,
+                              )
+                            }
                           },
                         },
                         t('roots.deleteSelected'),
@@ -2276,7 +2451,7 @@ window.__ModuleLoader__.load({
                   h('div', { className: 'ap-actions' }, h('button', { type: 'button', className: 'ap-btn', onClick: () => setDetailToken((value) => value + 1) }, t('retry'))),
                 )
               : detail.data
-                ? h(ProjectDetail, { detail: detail.data, t })
+                ? h(ProjectDetail, { detail: detail.data, t, revision: detailToken })
                 : h('section', { className: 'ap-detail' }, h(EmptyDetail, { roots: state.data?.roots, t })),
         ),
       )
