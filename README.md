@@ -50,7 +50,7 @@
 第 2 次 create（variablesMode=merge，补上 启动按钮/报警灯）→ Static check: 0；Vendor compile: 0 error(s), 0 warning(s)
 ```
 
-- **新增 POU**：`create` 的 `newPous: [{name, stText, variables}]` 会克隆模板里的 ST 程序实体（新 GUID、正文、局部变量表、任务关联），重名直接报错，失败时删除半成品。默认挂到模板的第一个任务，结果里会写明挂到了哪个任务（`task`）；要挂到指定任务用 `taskName`，不想挂（自己在 Sysmac 里分配）用 `associateTask: false`。实测新增 `PRG_NewDemo2`（局部变量 `计数2`）后原厂编译 `0 error(s), 0 warning(s)`。
+- **新增 POU**：`create` 的 `newPous: [{name, stText, variables}]` 会克隆模板里的 ST 程序实体（新 GUID、正文、局部变量表），重名直接报错，失败时删除半成品。**任务分配默认留给你**：新程序不会挂到任何任务，结果里会写明 `task: null`；要挂到某个任务就传 `taskName`（或 `associateTask: true` 挂到第一个任务）。实测新增 `PRG_NewDemo2`（局部变量 `计数2`）后原厂编译 `0 error(s), 0 warning(s)`。
 
 错误用来改，警告一般可以忽略（`warningCount` 仍会返回，但不挡流程）。也可以单独用 `plc_sysmac action=compile path=...` 复查，它会复制一份工程、先按 F7「检查所有程序」、再「重编译控制器」，重编译确认框自动点「是(Y)」，然后读回错误/警告数量和每条消息（含 POU、行、列）。实测坏工程返回：
 
