@@ -10,7 +10,7 @@
 - **识别博途工程**：不要求文件夹名以 `.ap16/.ap18` 结尾——只要文件夹里有 `<name>.ap16/.ap18` 文件（旁边有 `System/`、`IM/` 等项目结构）就会被识别，并标出版本。点「读取设备与块」会通过 Openness 列出设备和全部程序块（首次会启动后台 TIA，约 20–40 秒）。
 - **静态校验**：选中 `.smc2` 点「运行校验」，离线检查未声明标识符、重复变量、重复 AT 地址、IF/CASE/FOR/WHILE 块不配平，直接列出 POU 和行号；生成工程时自动跑一次。
 - **ST → Sysmac XML**：把 `.st` 源文件（`TYPE` / `FUNCTION_BLOCK` / `PROGRAM`）转换成 Sysmac Studio 可导入的 **IEC 61131-10 XML**。转换器沿用工作区里已用官方 XSD 校验过的那套实现。
-- **博途 Openness**：用官方 `Siemens.Engineering` 接口列设备/块、导入 SCL 外部源并编译、编译 PLC、导出块 XML。`plan` 只生成命令文件不动博途，`run` 才真正连博途。
+- **博途 Openness**：用官方 `Siemens.Engineering` 接口列设备/块、导入 SCL 外部源并编译、编译 PLC、导出块 XML、读标签表，以及**读块接口**（`readBlocks`：输入/输出/InOut/Static/Temp/Constant 成员，带类型、起始值和注释）。`plan` 只生成命令文件不动博途，`run` 才真正连博途。
 - **工具链体检**：TIA Portal / Openness 程序集 / `Siemens TIA Openness` 用户组、Sysmac Studio、.NET Framework、PowerShell、Python 3，一次看清。
 
 ## 直接生成工程文件
@@ -115,7 +115,7 @@
 | `plc_env` | 探测本机 PLC 工具链（只读） |
 | `plc_sysmac` | `scan` / `overview` / `variables` / `pou` / `export-variables` / `design` / `create` / `verify` / `compile`：读写 `.smc2`、静态校验、原厂编译 |
 | `plc_st` | `scan` / `convert`：`.st` → Sysmac 可导入的 IEC 61131-10 XML |
-| `plc_tia` | `plan` / `run`：通过 TIA Openness 建工程、列块、导入 SCL、编译、导出块、读标签表 |
+| `plc_tia` | `plan` / `run`：通过 TIA Openness 建工程、列块、导入 SCL、编译、导出块、读标签表、读块接口（`readBlocks`） |
 | `plc_io` | 统一 IO 清单：输入 / 输出 / IO 区 / 存储 / 内部，带地址与所属变量表（只读） |
 
 面板和工具用的是同一套 Host 实现，面板上的按钮只是把这些操作做成了可视化入口。
@@ -215,6 +215,7 @@
 - **`.ap18` / `.ap16` 真实生成**：`plc_tia run create` 在本机创建 `AgentPlcDemo.ap18`（V18 API，PLC_1 + 导入 `FB_Conveyor.scl`，编译 `Success`，`list` 读回 `Main, FB_Conveyor`）和 `AgentPlcV16.ap16`（V16 API，PLC_1，编译 `Success`）。
 - `plc_tia run importScl` 对已有工程导入 SCL 并编译，返回 `state: Success` 与编译器消息。
 - **TIA 编译错误可读**：Openness 的块级消息 `Description` 是空的，但递归子消息带真实错误文本和行号；驱动现在把所属块一路传下去，实测坏工程 `BrokenTest.ap16` 返回 `29 error(s)`，摘要形如 `Error: Tag "DB_SD".Main not defined. [OB_SD (OB123) line 3]`，所以 TIA 也能按真实错误改。
+- **TIA 块接口可读**：Openness 对象模型不暴露块接口，所以 `readBlocks` 先把块导出成 Simatic ML，再由 Host 解析 `<Interface><Sections>`；实测 `BrokenTest` 的 `Main`（OB）读出 `Input 2: Initial_Call, Remanence`（含注释），解析器在真实导出上覆盖 FB/FC/OB 的 Input/Output/InOut/Static/Temp/Constant。**不一致（有编译错误）的块 TIA 拒绝导出**，这时会明确返回「先修错误再读」，不会给空接口。
 - **内置示例模板**：`plc_sysmac create` 可直接以 `examples/AgentPLC_Demo.smc2` 为模板（不需要把它加进扫描目录），生成的 `PRG_Example` 挂在 `PrimaryTask`，静态校验 `0 error(s)`；面板「新建工程」的模板下拉里也能选到「内置示例」，不填输出路径时写到「文档」目录。
 - **ST 转换（本机真实文件）**：`案例工程\01_类型定义.st` 转出 6 个数据类型；面板路由 `/st-source`、`/st-xml`（IEC 61131-10）与 `/st-xml&format=plcopen` 均返回 200，中文路径正常。
 

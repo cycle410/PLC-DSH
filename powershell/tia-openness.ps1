@@ -92,11 +92,19 @@ function Get-Blocks([object]$Group) {
       name   = "$($block.Name)"
       number = "$($block.Number)"
       type   = "$($block.TypeIdentifier)"
+      kind   = "$($block.GetType().Name)"
     }
   }
   foreach ($child in $Group.Groups) {
     $blocks += Get-Blocks -Group $child
   }
+  return $blocks
+}
+
+function Get-BlockObjects([object]$Group) {
+  $blocks = @()
+  foreach ($block in $Group.Blocks) { $blocks += $block }
+  foreach ($child in $Group.Groups) { $blocks += Get-BlockObjects -Group $child }
   return $blocks
 }
 
@@ -246,6 +254,67 @@ try {
           ok     = $true
           action = 'list'
           data   = [pscustomobject]@{ project = "$($project.Name)"; path = "$($project.Path)"; devices = $devices }
+        })
+    }
+    'readBlocks' {
+      $wanted = @()
+      if ($command.blockPaths) { $wanted = @($command.blockPaths | ForEach-Object { "$_" }) }
+      $limit = 30
+      if ($command.limit) { try { $limit = [int]$command.limit } catch { } }
+      if ($limit -lt 1) { $limit = 1 }
+      if ($limit -gt 100) { $limit = 100 }
+      $targets = @()
+      if ($wanted.Count -gt 0) {
+        foreach ($path in $wanted) {
+          $block = $null
+          try { $block = Find-Block -Group $software.BlockGroup -Path $path } catch { $block = $null }
+          if ($null -eq $block) {
+            $leaf = ($path -split '/')[-1]
+            $block = Find-BlockAnywhere -Group $software.BlockGroup -Name $leaf
+          }
+          if ($null -eq $block) { throw "Block not found: $path" }
+          $targets += $block
+        }
+      } else {
+        $targets = @(Get-BlockObjects -Group $software.BlockGroup)
+      }
+      $total = $targets.Count
+      # The block interface is not exposed by the Openness object model, so export the
+      # selected blocks and let the Host parse the Simatic ML interface out of the XML.
+      $directory = Join-Path $env:TEMP ("agentplc-readblocks-" + [guid]::NewGuid().ToString('N'))
+      New-Item -ItemType Directory -Path $directory -Force | Out-Null
+      $entries = @()
+      $index = 0
+      foreach ($block in ($targets | Select-Object -First $limit)) {
+        $index++
+        $safeName = ("$($block.Name)" -replace '[\\/:*?"<>|]', '_')
+        $file = Join-Path $directory ("{0}_{1}.xml" -f $index, $safeName)
+        $entry = [pscustomobject]@{
+          name   = "$($block.Name)"
+          number = "$($block.Number)"
+          type   = "$($block.TypeIdentifier)"
+          kind   = "$($block.GetType().Name)"
+          file   = $file
+        }
+        try {
+          $block.Export((New-Object System.IO.FileInfo($file)), [Siemens.Engineering.ExportOptions]::None)
+        } catch {
+          $entry | Add-Member -NotePropertyName exportError -NotePropertyValue "$($_.Exception.Message)"
+        }
+        $entries += $entry
+      }
+      Write-Reply ([pscustomobject]@{
+          ok     = $true
+          action = 'readBlocks'
+          data   = [pscustomobject]@{
+            project   = "$($project.Name)"
+            plc       = "$($software.Name)"
+            total     = $total
+            returned  = $entries.Count
+            truncated = ($total -gt $entries.Count)
+            directory = $directory
+            blocks    = $entries
+          }
         })
     }
     'compile' {
