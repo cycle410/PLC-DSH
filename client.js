@@ -150,6 +150,11 @@ window.__ModuleLoader__.load({
         'tia.blocks': '块',
         'tia.types': '数据类型',
         'tia.openHint': '首次读取可能弹出「Openness 访问」提示，选「全部确定」即可。',
+        'tia.interfaces': '块接口',
+        'tia.readAllInterfaces': '读取前 20 个块',
+        'tia.chooseBlock': '选一个块读接口…',
+        'tia.interfacesHint': '读取会后台启动博途并导出块 XML（约 40 秒）；有编译错误的块 TIA 拒绝导出。',
+        'tia.noMembers': '这个块没有接口成员',
         'io.title': 'IO 清单',
         'io.direction': '方向',
         'io.read': '读取 IO 清单',
@@ -332,6 +337,11 @@ window.__ModuleLoader__.load({
         'tia.blocks': 'blocks',
         'tia.types': 'types',
         'tia.openHint': 'The first read may show an "Openness access" prompt; choose "Allow all".',
+        'tia.interfaces': 'Block interfaces',
+        'tia.readAllInterfaces': 'Read first 20 blocks',
+        'tia.chooseBlock': 'Pick a block to read…',
+        'tia.interfacesHint': 'Reading starts TIA in the background and exports block XML (~40 s); blocks with compile errors cannot be exported.',
+        'tia.noMembers': 'This block has no interface members',
         'io.title': 'IO inventory',
         'io.direction': 'Direction',
         'io.read': 'Load IO inventory',
@@ -685,6 +695,13 @@ window.__ModuleLoader__.load({
 }
 .ap-input {
   height: 28px; width: 220px; padding: 0 8px;
+  border-radius: 6px; font: inherit; font-size: 12px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  background: var(--dsw-alias-bg-base);
+  color: var(--dsw-alias-label-primary);
+}
+.ap-select {
+  height: 28px; max-width: 220px; padding: 0 6px;
   border-radius: 6px; font: inherit; font-size: 12px;
   border: 1px solid var(--dsw-alias-border-l1);
   background: var(--dsw-alias-bg-base);
@@ -1673,6 +1690,35 @@ window.__ModuleLoader__.load({
         }
       }
       const devices = state.data?.devices ?? []
+      const blockNames = [...new Set(devices.flatMap((device) => (device.plc?.blocks ?? []).map((block) => block.name)))]
+      const [interfaces, setInterfaces] = React.useState({ loading: false, data: null, error: null, block: null })
+      const readInterfaces = async (block) => {
+        setInterfaces({ loading: true, data: null, error: null, block: block ?? null })
+        try {
+          const params = new URLSearchParams({ path: project.path })
+          if (block) params.set('block', block)
+          else params.set('limit', '20')
+          const response = await fetch(`/agentplc/api/tia/blocks?${params.toString()}`, {
+            credentials: 'same-origin',
+            headers: { accept: 'application/json' },
+          })
+          const text = await response.text()
+          let payload
+          try {
+            payload = JSON.parse(text)
+          } catch {
+            payload = { ok: false, error: text.slice(0, 160) || `HTTP ${response.status}` }
+          }
+          if (!response.ok || !payload.ok) {
+            setInterfaces({ loading: false, data: null, error: payload.error ?? `HTTP ${response.status}`, block: block ?? null })
+          } else {
+            setInterfaces({ loading: false, data: payload.data, error: null, block: block ?? null })
+          }
+        } catch (error) {
+          setInterfaces({ loading: false, data: null, error: error?.message ?? String(error), block: block ?? null })
+        }
+      }
+      const interfaceBlocks = interfaces.data?.blocks ?? []
       return h(
         React.Fragment,
         null,
@@ -1732,6 +1778,75 @@ window.__ModuleLoader__.load({
               : h('div', { className: 'ap-hint' }, '—'),
           )
         }),
+        h(
+          'div',
+          { className: 'ap-section', 'aria-busy': interfaces.loading ? 'true' : undefined },
+          h(
+            'div',
+            { className: 'ap-io-head' },
+            h('span', { className: 'ap-section-title' }, t('tia.interfaces')),
+            h(
+              'div',
+              { className: 'ap-io-tools' },
+              blockNames.length > 0
+                ? h(
+                    'select',
+                    {
+                      className: 'ap-select',
+                      value: '',
+                      'aria-label': t('tia.chooseBlock'),
+                      onChange: (event) => {
+                        if (event.target.value) readInterfaces(event.target.value)
+                      },
+                    },
+                    [
+                      h('option', { key: '', value: '' }, t('tia.chooseBlock')),
+                      ...blockNames.map((name) => h('option', { key: name, value: name }, name)),
+                    ],
+                  )
+                : null,
+              h(
+                'button',
+                { type: 'button', className: 'ap-btn primary', onClick: () => readInterfaces(null), disabled: interfaces.loading },
+                interfaces.loading && !interfaces.block ? t('io.reading') : t('tia.readAllInterfaces'),
+              ),
+            ),
+          ),
+          h('div', { className: 'ap-hint' }, t('tia.interfacesHint')),
+          interfaces.error ? h('div', { className: 'ap-error' }, t('error.prefix', { error: interfaces.error })) : null,
+          interfaceBlocks.map((block) =>
+            h(
+              'div',
+              { className: 'ap-section', key: block.name },
+              h(
+                'div',
+                { className: 'ap-section-head' },
+                h('span', { className: 'ap-section-title' }, `${block.name}${block.kind ? ` · ${block.kind}` : ''}`),
+                block.number ? h('span', { className: 'ap-pou-meta' }, `#${block.number}`) : null,
+              ),
+              block.interfaceError
+                ? h('div', { className: 'ap-hint' }, block.interfaceError)
+                : (block.sections ?? []).filter((section) => section.members.length > 0).length === 0
+                  ? h('div', { className: 'ap-hint' }, t('tia.noMembers'))
+                  : (block.sections ?? [])
+                      .filter((section) => section.members.length > 0)
+                      .map((section) =>
+                        h(
+                          React.Fragment,
+                          { key: section.name },
+                          h('div', { className: 'ap-hint' }, `${section.name} (${section.members.length})`),
+                          h(
+                            'div',
+                            { className: 'ap-chips' },
+                            section.members.map((member) =>
+                              h('span', { className: 'ap-chip', key: member.name, title: member.comment || undefined }, `${member.name}: ${member.dataType}`),
+                            ),
+                          ),
+                        ),
+                      ),
+            ),
+          ),
+        ),
         h('div', { className: 'ap-hint' }, t('tia.openHint')),
       )
     }

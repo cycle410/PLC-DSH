@@ -105,7 +105,7 @@
 - 左栏列出扫描目录里的 `.smc2` / 博途工程目录 / `.st` 源文件，可搜索。
 - 选 `.smc2`：概览（控制器、任务、变量表、解析提示）、**IO 清单**、变量（搜索 + 下载 CSV）、程序（POU 列表 → ST 源码或梯形图逐级；MultipartLadder 的每一段分开显示，内嵌 ST 可展开）。
 - 选 `.st`：预览源码，一键生成并下载 Sysmac 可导入的 XML；失败时面板内显示原因，不会跳转。
-- 选博途工程：说明为什么必须走 Openness，给出可复制的 Agent 指令；**IO 清单**同样能读（后台启动博途，约 40 秒）。
+- 选博途工程：说明为什么必须走 Openness，给出可复制的 Agent 指令；**IO 清单**同样能读（后台启动博途，约 40 秒）；新增**块接口**面板——从下拉框选一个块，或一次读前 20 个块，按 Input / Output / InOut / Static / Temp / Constant 列出成员（名称、类型、注释），有编译错误的块会明确提示 TIA 拒绝导出。
 - 顶部三张卡片是环境体检；「刷新」会重新扫描目录并重读当前工程。
 
 ## Agent 工具
@@ -211,7 +211,8 @@
 - **原厂编译校验**：`plc_sysmac compile` 在提权副本上执行 F7「检查所有程序」+「重编译控制器」（自动确认「所有程序将重新编译，你要继续吗？」→ 是(Y)），从编译窗口读回 `2 error(s), 0 warning(s)` 和两条带 `PRG_Init line 3/4` 的消息；探针实例跑完自动关闭，原工程未改动。
 - `plc_tia plan`（create/list/importScl 等）能按工程后缀选中 V16 或 V18 API 并生成命令文件。
 - **统一 IO 清单**：`真实工程.smc2` 608 个变量 → 6 输入 / 1 输出 / 601 内部（7 个有地址，EtherCAT 输入输出按对象路径分对）；`现场V18工程` 140 个标签 → 84 输入 / 42 输出 / 14 存储，地址全部识别，标签注释从 Openness 的 `MultilingualText` 正确取文本。面板路由 `/agentplc/api/io` 与 `/agentplc/api/io.csv`（UTF-8 BOM + CRLF）实测 200，CSV 51 KB。另在 20 个真实 `.smc2` 工程上抽检 3873 条有地址变量：`%D` 全部归存储，带 `Input`/`Output` 字样的 ECAT / IOBus / BuiltInIO 地址全部归输入/输出，`MC://_MC_AX` 归 IO 区。
-- **非 ASCII SCL 预警**：`plc_tia plan` 发现源文件代码里（注释和字符串除外）有中文标识符时会先给出警告，避免「返回 Success 但块没生成」；纯中文注释不误报（`FB_StarDelta_EN.scl` 不报，`FB_StarDelta.scl` 报）。
+- **TIA SCL 导入的真实坑（已修正结论）**：不是中文标识符，而是**行尾 `//` 注释**——同样的代码带行尾注释时 TIA 报 Success 却整块跳过（`FB_Skip_B`），去掉注释后正常生成并编译；行首 `//`、`(* *)` 块注释、中文标识符都能正常导入（`FB_Cmt_Line`、`FB_Cmt_C`、`FB_CN_NoComment2` 实测生成 + 0 error）。`plc_tia ... autoFix:true` 会在临时副本里删除行尾注释再导入，结果报告删除条数和被跳过的块；`plan` 也会先对这一情况告警。
+- **面板块接口**：`tiaBlocks`（面板 `/agentplc/api/tia/blocks` 与 `plc_tia readBlocks` 共用）实测 `BrokenTest` 的 `Main`（OB）读出 `Input 2`（`Initial_Call`、`Remanence` 带注释）；不一致的块明确提示「先修编译错误再读」。
 - **`.ap18` / `.ap16` 真实生成**：`plc_tia run create` 在本机创建 `AgentPlcDemo.ap18`（V18 API，PLC_1 + 导入 `FB_Conveyor.scl`，编译 `Success`，`list` 读回 `Main, FB_Conveyor`）和 `AgentPlcV16.ap16`（V16 API，PLC_1，编译 `Success`）。
 - `plc_tia run importScl` 对已有工程导入 SCL 并编译，返回 `state: Success` 与编译器消息。
 - **autoFix + 真实闭环**：以真实 `真实工程.smc2` 为模板，新程序 `PRG_CommWatch` 使用全局 `CommOk` 但没声明；`create` 加 `autoFix:true` 自动补 `CommOk:BOOL` 的 `VAR_EXTERNAL`，静态校验 `0 error(s)`，原厂编译 `0 error(s), 0 warning(s)`（`PRG_CommWatch` 未挂任务，任务仍归用户）。顺带修了两处：静态校验曾把 `T#1s` 里的 `s` 误报成未声明标识符；`create` 的输出在扫描目录外（如 `%TEMP%`、文档）时编译会被扫描目录规则挡住。
