@@ -162,6 +162,9 @@ window.__ModuleLoader__.load({
         'tia.interfacesHint': '读取会后台启动博途并导出块 XML（约 40 秒）；有编译错误的块 TIA 拒绝导出。',
         'tia.noMembers': '这个块没有接口成员',
         'io.title': 'IO 清单',
+        'sysmac.compile': '原厂编译（UAC）',
+        'sysmac.compiling': '编译中…（请确认 UAC）',
+        'sysmac.compileResult': '原厂编译：{errors} 个错误 / {warnings} 个警告',
         'io.direction': '方向',
         'io.read': '读取 IO 清单',
         'io.reading': '正在读取…',
@@ -355,6 +358,9 @@ window.__ModuleLoader__.load({
         'tia.interfacesHint': 'Reading starts TIA in the background and exports block XML (~40 s); blocks with compile errors cannot be exported.',
         'tia.noMembers': 'This block has no interface members',
         'io.title': 'IO inventory',
+        'sysmac.compile': 'Vendor compile (UAC)',
+        'sysmac.compiling': 'Compiling… (confirm the UAC prompt)',
+        'sysmac.compileResult': 'Vendor compile: {errors} error(s) / {warnings} warning(s)',
         'io.direction': 'Direction',
         'io.read': 'Load IO inventory',
         'io.reading': 'Reading…',
@@ -1470,6 +1476,30 @@ window.__ModuleLoader__.load({
         )
       }, [variables, query])
       const pouRows = project.pous ?? []
+      const [vendor, setVendor] = React.useState({ loading: false, data: null, error: null })
+      const compileVendor = async () => {
+        setVendor({ loading: true, data: null, error: null })
+        try {
+          const response = await fetch(`/agentplc/api/sysmac/compile?path=${encodeURIComponent(project.path)}`, {
+            credentials: 'same-origin',
+            headers: { accept: 'application/json' },
+          })
+          const text = await response.text()
+          let payload
+          try {
+            payload = JSON.parse(text)
+          } catch {
+            payload = { ok: false, error: text.slice(0, 160) || `HTTP ${response.status}` }
+          }
+          if (!response.ok || typeof payload.errorCount !== 'number') {
+            setVendor({ loading: false, data: null, error: payload.error ?? `HTTP ${response.status}` })
+          } else {
+            setVendor({ loading: false, data: payload, error: null })
+          }
+        } catch (error) {
+          setVendor({ loading: false, data: null, error: error?.message ?? String(error) })
+        }
+      }
       return h(
         React.Fragment,
         null,
@@ -1482,7 +1512,16 @@ window.__ModuleLoader__.load({
             label: t('variables.download'),
             t,
           }),
+          h(
+            'button',
+            { type: 'button', className: 'ap-btn', onClick: compileVendor, disabled: vendor.loading },
+            vendor.loading ? t('sysmac.compiling') : t('sysmac.compile'),
+          ),
         ),
+        vendor.error ? h('div', { className: 'ap-error' }, t('error.prefix', { error: vendor.error })) : null,
+        vendor.data
+          ? h('div', { className: 'ap-hint' }, t('sysmac.compileResult', { errors: vendor.data.errorCount ?? 0, warnings: vendor.data.warningCount ?? 0 }))
+          : null,
         h(AgentHandoff, { text: t('copy.sysmac', { path: project.path }), t }),
         h(VerifyPanel, { projectPath: project.path, t }),
         h(MetaGrid, {
