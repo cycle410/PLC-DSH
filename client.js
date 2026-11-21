@@ -151,6 +151,12 @@ window.__ModuleLoader__.load({
         'tia.types': '数据类型',
         'tia.openHint': '首次读取可能弹出「Openness 访问」提示，选「全部确定」即可。',
         'tia.interfaces': '块接口',
+        'tia.compile': '编译 PLC',
+        'tia.compiling': '编译中…',
+        'tia.compileResult': '编译结果：{state}，{errors} 个错误 / {warnings} 个警告',
+        'tia.deleteBlock': '删除块',
+        'tia.deleteConfirm': '确定删除块「{name}」吗？删除后会重新编译。',
+        'tia.deleted': '已删除 {name}，已重新编译',
         'tia.readAllInterfaces': '读取前 20 个块',
         'tia.chooseBlock': '选一个块读接口…',
         'tia.interfacesHint': '读取会后台启动博途并导出块 XML（约 40 秒）；有编译错误的块 TIA 拒绝导出。',
@@ -338,6 +344,12 @@ window.__ModuleLoader__.load({
         'tia.types': 'types',
         'tia.openHint': 'The first read may show an "Openness access" prompt; choose "Allow all".',
         'tia.interfaces': 'Block interfaces',
+        'tia.compile': 'Compile PLC',
+        'tia.compiling': 'Compiling…',
+        'tia.compileResult': 'Compile result: {state}, {errors} error(s) / {warnings} warning(s)',
+        'tia.deleteBlock': 'Delete block',
+        'tia.deleteConfirm': 'Delete block "{name}"? It will recompile after deletion.',
+        'tia.deleted': 'Deleted {name} and recompiled',
         'tia.readAllInterfaces': 'Read first 20 blocks',
         'tia.chooseBlock': 'Pick a block to read…',
         'tia.interfacesHint': 'Reading starts TIA in the background and exports block XML (~40 s); blocks with compile errors cannot be exported.',
@@ -601,6 +613,13 @@ window.__ModuleLoader__.load({
   cursor: pointer; font: inherit; font-size: 11.5px; padding: 2px 9px;
   transition: border-color 120ms ease, background 120ms ease, color 120ms ease;
 }
+.ap-chip-del {
+  border: 0; background: transparent; cursor: pointer;
+  color: var(--dsw-alias-label-secondary); font-size: 13px; line-height: 1;
+  padding: 0 0 0 6px; vertical-align: middle;
+}
+.ap-chip-del:hover { color: var(--dsw-alias-state-error-primary); }
+.ap-chip-del:disabled { opacity: 0.4; cursor: default; }
 .ap-chip.filter:hover { border-color: var(--dsw-alias-border-l2); color: var(--dsw-alias-label-primary); }
 .ap-chip.filter.active {
   border-color: color-mix(in srgb, var(--dsw-alias-brand-primary) 55%, transparent);
@@ -1719,6 +1738,54 @@ window.__ModuleLoader__.load({
         }
       }
       const interfaceBlocks = interfaces.data?.blocks ?? []
+      const [compileState, setCompileState] = React.useState({ loading: false, data: null, error: null })
+      const compilePlc = async () => {
+        setCompileState({ loading: true, data: null, error: null })
+        try {
+          const response = await fetch(`/agentplc/api/tia/compile?path=${encodeURIComponent(project.path)}`, {
+            credentials: 'same-origin',
+            headers: { accept: 'application/json' },
+          })
+          const text = await response.text()
+          let payload
+          try {
+            payload = JSON.parse(text)
+          } catch {
+            payload = { ok: false, error: text.slice(0, 160) || `HTTP ${response.status}` }
+          }
+          if (!response.ok || !payload.ok) setCompileState({ loading: false, data: null, error: payload.error ?? `HTTP ${response.status}` })
+          else setCompileState({ loading: false, data: payload.data, error: null })
+        } catch (error) {
+          setCompileState({ loading: false, data: null, error: error?.message ?? String(error) })
+        }
+      }
+      const [deleting, setDeleting] = React.useState(false)
+      const [deleteNotice, setDeleteNotice] = React.useState(null)
+      const deleteBlock = async (name) => {
+        if (!window.confirm(t('tia.deleteConfirm', { name }))) return
+        setDeleting(true)
+        setDeleteNotice(null)
+        try {
+          const response = await fetch('/agentplc/api/tia/delete', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { accept: 'application/json', 'content-type': 'application/json' },
+            body: JSON.stringify({ path: project.path, blocks: [name] }),
+          })
+          const payload = await response.json().catch(() => ({}))
+          if (!response.ok || !payload.ok) {
+            setDeleteNotice({ error: payload.error ?? `HTTP ${response.status}` })
+          } else {
+            setDeleteNotice({ ok: name })
+            setInterfaces({ loading: false, data: null, error: null, block: null })
+            await readDevices()
+          }
+        } catch (error) {
+          setDeleteNotice({ error: error?.message ?? String(error) })
+        } finally {
+          setDeleting(false)
+        }
+      }
       return h(
         React.Fragment,
         null,
@@ -1740,8 +1807,27 @@ window.__ModuleLoader__.load({
             { type: 'button', className: 'ap-btn primary', onClick: readDevices, disabled: state.loading },
             state.loading ? t('tia.reading') : t('tia.readDevices'),
           ),
+          h(
+            'button',
+            { type: 'button', className: 'ap-btn', onClick: compilePlc, disabled: compileState.loading },
+            compileState.loading ? t('tia.compiling') : t('tia.compile'),
+          ),
         ),
         state.error ? h('div', { className: 'ap-error' }, t('error.prefix', { error: state.error })) : null,
+        compileState.error ? h('div', { className: 'ap-error' }, t('error.prefix', { error: compileState.error })) : null,
+        compileState.data
+          ? h(
+              'div',
+              { className: 'ap-hint' },
+              t('tia.compileResult', {
+                state: compileState.data.state ?? '?',
+                errors: compileState.data.errorCount ?? 0,
+                warnings: compileState.data.warningCount ?? 0,
+              }),
+            )
+          : null,
+        deleteNotice?.error ? h('div', { className: 'ap-error' }, t('error.prefix', { error: deleteNotice.error })) : null,
+        deleteNotice?.ok ? h('div', { className: 'ap-hint' }, t('tia.deleted', { name: deleteNotice.ok })) : null,
         devices.map((device) => {
           const plc = device.plc
           return h(
@@ -1765,7 +1851,25 @@ window.__ModuleLoader__.load({
                   h(
                     'div',
                     { className: 'ap-chips' },
-                    (plc.blocks ?? []).map((block) => h('span', { className: 'ap-chip', key: block.name }, block.name)),
+                    (plc.blocks ?? []).map((block) =>
+                      h(
+                        'span',
+                        { className: 'ap-chip', key: block.name },
+                        block.name,
+                        h(
+                          'button',
+                          {
+                            type: 'button',
+                            className: 'ap-chip-del',
+                            title: t('tia.deleteBlock'),
+                            'aria-label': t('tia.deleteBlock'),
+                            disabled: deleting,
+                            onClick: () => deleteBlock(block.name),
+                          },
+                          '×',
+                        ),
+                      ),
+                    ),
                   ),
                   (plc.types ?? []).length > 0
                     ? h(
