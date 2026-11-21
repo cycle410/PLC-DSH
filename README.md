@@ -6,6 +6,7 @@
 
 - **离线读 `.smc2`**：不需要装 Sysmac Studio。控制器型号/固件、任务、POU 列表、每个 POU 的 ST 源码或梯形图梯级、全局与局部变量表都能读出来，变量表可一键导出 CSV。
 - **统一 IO 清单**：把欧姆龙和西门子的地址收敛成同一张表——每条变量/标签标成**输入 / 输出 / IO 区 / 存储 / 内部**，带地址、数据类型、注释和所属变量表（局部表会标出所属 POU）。`.smc2` 离线解析；博途工程走 Openness。面板可筛选、导出 CSV，Agent 用 `plc_io` 读同一份数据。只读，不会替你分配地址。
+  识别范围：欧姆龙 `ECAT://node#[1,2]/Input Bit ...`、`IOBus://unit#2/...`、`BuiltInIO://cpu/#0/Input_Bit_00`、`%I/%Q`、`%D`（DM，归存储）、`D/W/H/A/E`、`CIO`（方向不明，归 IO 区）、`MC://_MC_AX[0]`（运动轴，归 IO 区）；西门子 `%I*` 输入、`%Q*` 输出、`%M*` 存储，无地址的标签归内部。
 - **识别博途工程**：不要求文件夹名以 `.ap16/.ap18` 结尾——只要文件夹里有 `<name>.ap16/.ap18` 文件（旁边有 `System/`、`IM/` 等项目结构）就会被识别，并标出版本。点「读取设备与块」会通过 Openness 列出设备和全部程序块（首次会启动后台 TIA，约 20–40 秒）。
 - **静态校验**：选中 `.smc2` 点「运行校验」，离线检查未声明标识符、重复变量、重复 AT 地址、IF/CASE/FOR/WHILE 块不配平，直接列出 POU 和行号；生成工程时自动跑一次。
 - **ST → Sysmac XML**：把 `.st` 源文件（`TYPE` / `FUNCTION_BLOCK` / `PROGRAM`）转换成 Sysmac Studio 可导入的 **IEC 61131-10 XML**。转换器沿用工作区里已用官方 XSD 校验过的那套实现。
@@ -209,7 +210,7 @@
 - **静态校验**：故意写坏的工程报 `2 error(s)`（未声明变量A/B，带行号），正常工程报 `0 error(s)`；`plc_sysmac create` 生成时自动校验，坏样例直接返回 `1 error(s) — 未声明标识符 未声明输出（第 2 行）`；面板路由 `/agentplc/api/sysmac/verify` 返回 200 和问题列表。
 - **原厂编译校验**：`plc_sysmac compile` 在提权副本上执行 F7「检查所有程序」+「重编译控制器」（自动确认「所有程序将重新编译，你要继续吗？」→ 是(Y)），从编译窗口读回 `2 error(s), 0 warning(s)` 和两条带 `PRG_Init line 3/4` 的消息；探针实例跑完自动关闭，原工程未改动。
 - `plc_tia plan`（create/list/importScl 等）能按工程后缀选中 V16 或 V18 API 并生成命令文件。
-- **统一 IO 清单**：`真实工程.smc2` 608 个变量 → 6 输入 / 1 输出 / 601 内部（7 个有地址，EtherCAT 输入输出按对象路径分对）；`现场V18工程` 140 个标签 → 84 输入 / 42 输出 / 14 存储，地址全部识别，标签注释从 Openness 的 `MultilingualText` 正确取文本。面板路由 `/agentplc/api/io` 与 `/agentplc/api/io.csv`（UTF-8 BOM + CRLF）实测 200，CSV 51 KB。
+- **统一 IO 清单**：`真实工程.smc2` 608 个变量 → 6 输入 / 1 输出 / 601 内部（7 个有地址，EtherCAT 输入输出按对象路径分对）；`现场V18工程` 140 个标签 → 84 输入 / 42 输出 / 14 存储，地址全部识别，标签注释从 Openness 的 `MultilingualText` 正确取文本。面板路由 `/agentplc/api/io` 与 `/agentplc/api/io.csv`（UTF-8 BOM + CRLF）实测 200，CSV 51 KB。另在 20 个真实 `.smc2` 工程上抽检 3873 条有地址变量：`%D` 全部归存储，带 `Input`/`Output` 字样的 ECAT / IOBus / BuiltInIO 地址全部归输入/输出，`MC://_MC_AX` 归 IO 区。
 - **非 ASCII SCL 预警**：`plc_tia plan` 发现源文件代码里（注释和字符串除外）有中文标识符时会先给出警告，避免「返回 Success 但块没生成」；纯中文注释不误报（`FB_StarDelta_EN.scl` 不报，`FB_StarDelta.scl` 报）。
 - **`.ap18` / `.ap16` 真实生成**：`plc_tia run create` 在本机创建 `AgentPlcDemo.ap18`（V18 API，PLC_1 + 导入 `FB_Conveyor.scl`，编译 `Success`，`list` 读回 `Main, FB_Conveyor`）和 `AgentPlcV16.ap16`（V16 API，PLC_1，编译 `Success`）。
 - `plc_tia run importScl` 对已有工程导入 SCL 并编译，返回 `state: Success` 与编译器消息。
