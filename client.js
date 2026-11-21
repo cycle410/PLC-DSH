@@ -82,6 +82,8 @@ window.__ModuleLoader__.load({
         'verify.more': '还有 {n} 条未显示',
         'roots.add': '添加文件夹',
         'roots.browse': '浏览…',
+        'roots.addFailed': '添加失败：{error}',
+        'roots.pickUnavailable': '读不到所选文件夹的路径（当前外壳不支持），请把完整路径粘贴到输入框再点「添加文件夹」。',
         'roots.remove': '移除该扫描目录',
         'roots.list': '扫描目录 ({n})',
         'roots.deleteSelected': '删除选中',
@@ -245,6 +247,8 @@ window.__ModuleLoader__.load({
         'verify.more': '{n} more not shown',
         'roots.add': 'Add folder',
         'roots.browse': 'Browse…',
+        'roots.addFailed': 'Could not add the folder: {error}',
+        'roots.pickUnavailable': 'This shell does not expose the selected folder path; paste the full path into the box and press "Add folder".',
         'roots.remove': 'Remove this root',
         'roots.list': 'Scanned folders ({n})',
         'roots.deleteSelected': 'Delete selected',
@@ -2010,33 +2014,63 @@ window.__ModuleLoader__.load({
       }
 
       const folderInputRef = React.useRef(null)
+      const [rootError, setRootError] = React.useState(null)
+
+      const addRootPath = async (value) => {
+        const trimmed = String(value ?? '').trim()
+        if (!trimmed) return false
+        try {
+          const response = await fetch(`/agentplc/api/roots?action=add&path64=${encodeURIComponent(encodePath64(trimmed))}`, {
+            credentials: 'same-origin',
+            headers: { accept: 'application/json' },
+          })
+          const payload = await response.json().catch(() => ({}))
+          if (!response.ok || payload.ok === false) {
+            setRootError(t('roots.addFailed', { error: payload.error ?? `HTTP ${response.status}` }))
+            return false
+          }
+          setRootError(null)
+          setRefreshToken((token) => token + 1)
+          return true
+        } catch (error) {
+          setRootError(t('roots.addFailed', { error: error?.message ?? String(error) }))
+          return false
+        }
+      }
 
       const handlePickedFolder = async (event) => {
         const file = event.target.files && event.target.files[0]
         event.target.value = ''
         if (!file) return
         const full = typeof file.path === 'string' ? file.path : ''
-        if (!full) return
-        const value = full.replace(/[\\/][^\\/]*$/, '') || full
-        try {
-          await fetch(`/agentplc/api/roots?action=add&path64=${encodeURIComponent(encodePath64(value))}`, { credentials: 'same-origin' })
-          setRefreshToken((token) => token + 1)
-        } catch {
-          // Keep the typed input as the fallback.
+        if (!full) {
+          setRootError(t('roots.pickUnavailable'))
+          return
         }
+        await addRootPath(full.replace(/[\\/][^\\/]*$/, '') || full)
       }
 
-      const addRoot = React.useCallback(async () => {
-        const value = rootInput.trim()
-        if (!value) return
-        try {
-          await fetch(`/agentplc/api/roots?action=add&path64=${encodeURIComponent(encodePath64(value))}`, { credentials: 'same-origin' })
-          setRootInput('')
-          setRefreshToken((token) => token + 1)
-        } catch {
-          // Keep the input so the user can retry.
+      /**
+       * Prefer DSH's own directory picker. Recent Electron builds no longer expose File.path,
+       * so the hidden <input webkitdirectory> let the user pick a folder but never yielded its path.
+       */
+      const browseFolder = async () => {
+        const uiWorkspace = typeof ctx.get === 'function' ? ctx.get('uiWorkspace') : undefined
+        if (uiWorkspace && typeof uiWorkspace.pickDirectory === 'function') {
+          try {
+            const picked = await uiWorkspace.pickDirectory()
+            if (picked) await addRootPath(picked)
+            return
+          } catch (error) {
+            setRootError(t('roots.addFailed', { error: error?.message ?? String(error) }))
+          }
         }
-      }, [rootInput])
+        folderInputRef.current?.click()
+      }
+
+      const addRoot = async () => {
+        if (await addRootPath(rootInput)) setRootInput('')
+      }
 
       React.useEffect(() => {
         fetch('/agentplc/api/roots', { credentials: 'same-origin', headers: { accept: 'application/json' } })
@@ -2104,7 +2138,7 @@ window.__ModuleLoader__.load({
               {
                 type: 'button',
                 className: 'ap-btn',
-                onClick: () => folderInputRef.current?.click(),
+                onClick: browseFolder,
               },
               t('roots.browse'),
             ),
@@ -2181,6 +2215,7 @@ window.__ModuleLoader__.load({
                 : null,
             )
           : null,
+        rootError ? h('div', { className: 'ap-error ap-error-bar' }, rootError) : null,
         state.error ? h('div', { className: 'ap-error ap-error-bar' }, t('error.prefix', { error: state.error })) : null,
         h(ToolchainCards, { data: state.data, t }),
         h(
