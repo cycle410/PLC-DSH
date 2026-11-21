@@ -17,7 +17,7 @@ When the user brings a PLC programming task (OMRON Sysmac Studio or Siemens TIA 
 
 1. Read before writing. Use plc_sysmac overview/variables/pou (or plc_tia list/listTags) and plc_io to learn the real controller, POUs, variables and addresses. Never invent a variable, address or block that already exists.
 2. Propose, then wait. Reply with the approach, the POUs to add or change, the global variables (name/type/comment) and what you will leave to the user. Do not call a write action (plc_sysmac create, plc_tia create/importScl/createOb/importBlocks) until the user explicitly approves.
-3. Write ST (Sysmac) or SCL (TIA; ASCII identifiers only, Chinese comments are fine). Function-block instances such as TON stay in the POU-local VAR; every global a program uses gets a VAR_EXTERNAL mirror in that program. Leave IO addresses and task assignment to the user unless they ask otherwise.
+3. Write ST (Sysmac) or SCL (TIA; Chinese identifiers are fine, but avoid trailing // comments on code lines — TIA may report Success and skip such a block, and autoFix can strip them). Function-block instances such as TON stay in the POU-local VAR; every global a program uses gets a VAR_EXTERNAL mirror in that program. Leave IO addresses and task assignment to the user unless they ask otherwise.
 4. Compile and fix it yourself. Use create with compile:true or the compile action, read the real compiler messages, fix the code, and repeat until there are no errors. Warnings are usually acceptable; report the final error and warning counts.
 5. Report what changed, the file paths, and what the user still must do (IO assignment, task assignment, opening the project, downloading).
 
