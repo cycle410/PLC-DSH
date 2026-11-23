@@ -424,7 +424,10 @@ try {
         })
     }
     'createInstanceDb' {
-      $db = $software.BlockGroup.Blocks.CreateInstanceDB("FB_StarDelta_DB", $true, 124, "FB_StarDelta")
+      $fbName = if ($command.blockPaths -and @($command.blockPaths).Count -gt 0) { "$($command.blockPaths[0])" } else { 'FB_StarDelta' }
+      $dbName = if ("$($command.dbName)" -ne '') { "$($command.dbName)" } else { 'FB_StarDelta_DB' }
+      $dbNumber = if ($command.dbNumber) { [int]$command.dbNumber } else { 124 }
+      $db = $software.BlockGroup.Blocks.CreateInstanceDB($dbName, $true, $dbNumber, $fbName)
       $compiled = Compile-PlcSoftware -Software $software
       Write-Reply ([pscustomobject]@{
           ok     = $true
