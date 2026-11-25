@@ -9,6 +9,7 @@
   识别范围：欧姆龙 `ECAT://node#[1,2]/Input Bit ...`、`IOBus://unit#2/...`、`BuiltInIO://cpu/#0/Input_Bit_00`、`%I/%Q`、`%D`（DM，归存储）、`D/W/H/A/E`、`CIO`（方向不明，归 IO 区）、`MC://_MC_AX[0]`（运动轴，归 IO 区）；西门子 `%I*` 输入、`%Q*` 输出、`%M*` 存储，无地址的标签归内部。
 - **识别博途工程**：不要求文件夹名以 `.ap16/.ap18` 结尾——只要文件夹里有 `工程名.ap16` / `工程名.ap18` 文件（旁边有 `System/`、`IM/` 等项目结构）就会被识别，并标出版本。点「读取设备与块」会通过 Openness 列出设备和全部程序块（首次会启动后台 TIA，约 20–40 秒）。
 - **静态校验**：选中 `.smc2` 点「运行校验」，离线检查未声明标识符、重复变量、重复 AT 地址、IF/CASE/FOR/WHILE 块不配平，直接列出 POU 和行号；生成工程时自动跑一次。
+- **设计审查**：对工程里所有 ST POU 跑一组来自 `plc-skill` 审查清单的规则——定时器 `Q` 电平计数、联锁只在启动瞬间判断、无关闭到位开关时关超时被排除、边沿实例只更新不读取、连续重复赋值、自引用锁存；结果按 P1/P2/P3 给出 POU、行号、代码片段和建议。面板「设计审查」按钮和 `plc_sysmac action=review` 都能用；实测 `干冰清洗_ST版本新框架` 命中 3 个 P1、4 个 P2、1 个 P3，与人工审查报告一致。
 - **ST → Sysmac XML**：把 `.st` 源文件（`TYPE` / `FUNCTION_BLOCK` / `PROGRAM`）转换成 Sysmac Studio 可导入的 **IEC 61131-10 XML**。转换器沿用工作区里已用官方 XSD 校验过的那套实现。
 - **博途 Openness**：用官方 `Siemens.Engineering` 接口列设备/块、导入 SCL 外部源并编译、编译 PLC、导出块 XML、读标签表、读块接口（`readBlocks`：输入/输出/InOut/Static/Temp/Constant 成员，带类型、起始值和注释），以及**删块**（`deleteBlocks`，用于清掉生成失败的块）。`plan` 只生成命令文件不动博途，`run` 才真正连博途。
 - **工具链体检**：TIA Portal / Openness 程序集 / `Siemens TIA Openness` 用户组、Sysmac Studio、.NET Framework、PowerShell、Python 3，一次看清。
@@ -113,7 +114,7 @@
 | 工具 | 用途 |
 |---|---|
 | `plc_env` | 探测本机 PLC 工具链（只读） |
-| `plc_sysmac` | `scan` / `overview` / `variables` / `pou` / `export-variables` / `design` / `create` / `verify` / `compile`：读写 `.smc2`、静态校验、原厂编译 |
+| `plc_sysmac` | `scan` / `overview` / `variables` / `pou` / `export-variables` / `design` / `create` / `verify` / `review` / `compile`：读写 `.smc2`、静态校验、plc-skill 设计审查、原厂编译 |
 | `plc_st` | `scan` / `convert`：`.st` → Sysmac 可导入的 IEC 61131-10 XML |
 | `plc_tia` | `plan` / `run`：通过 TIA Openness 建工程、列块、导入 SCL、删块、编译、导出块、读标签表、读块接口（`readBlocks`） |
 | `plc_io` | 统一 IO 清单：输入 / 输出 / IO 区 / 存储 / 内部，带地址与所属变量表（只读） |
